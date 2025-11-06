@@ -91,6 +91,27 @@
         </div>
       </div>
 
+      <!-- New: global font controls -->
+      <div class="row" style="margin-top:var(--gap)">
+        <div>
+          <label for="fontFamily">Font family</label>
+          <select id="fontFamily">
+            <option value="system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif">System UI</option>
+            <option value="Arial, Helvetica, sans-serif">Arial</option>
+            <option value="Verdana, Geneva, sans-serif">Verdana</option>
+            <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+            <option value="Trebuchet MS, Helvetica, sans-serif">Trebuchet MS</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Times New Roman, Times, serif">Times New Roman</option>
+            <option value="Courier New, Courier, monospace">Courier New</option>
+          </select>
+        </div>
+        <div>
+          <label for="customFont">Custom font name (advanced)</label>
+          <input id="customFont" type="text" placeholder="e.g., Inter, Poppins" />
+        </div>
+      </div>
+
       <div class="sizes" style="margin-top:var(--gap)">
         <div class="row3">
           <label>Room size <input id="size-room" type="number" min="24" max="220" value="120"></label>
@@ -109,7 +130,7 @@
         <button id="download">Download PNG</button>
         <button id="copy">Copy to clipboard</button>
       </div>
-      <p class="hint">Drag any text on the image to reposition. Use size inputs to change font sizes.</p>
+      <p class="hint">Drag any text to move it. Use sizes to change font sizes. Pick a font family or type a custom name installed on the device.</p>
     </div>
   </div>
 
@@ -120,17 +141,7 @@
     const c = $('c'), ctx = c.getContext('2d');
     const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
 
-    // Base style
-    const fonts = {
-      room:   w => `${w} ${sizes.room}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-      sub:    w => `${w} ${sizes.sub}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-      status: w => `${w} ${sizes.status}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-      time:   w => `${w} ${sizes.time}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-      note:   w => `${w} ${sizes.note}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-      footer: w => `${w} ${sizes.footer}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
-    };
-
-    // Sizes are editable via inputs
+    // Sizes are user-editable
     const sizes = {
       room: +$('size-room').value,
       sub: +$('size-sub').value,
@@ -138,6 +149,23 @@
       time: +$('size-time').value,
       note: +$('size-note').value,
       footer: +$('size-footer').value,
+    };
+
+    // Global font family (with optional custom)
+    const fontState = {
+      base: $('fontFamily').value,
+      custom: ''
+    };
+    function fontStack() {
+      return fontState.custom.trim() ? fontState.custom.trim() : fontState.base;
+    }
+    const fonts = {
+      room:   w => `${w} ${sizes.room}px ${fontStack()}`,
+      sub:    w => `${w} ${sizes.sub}px ${fontStack()}`,
+      status: w => `${w} ${sizes.status}px ${fontStack()}`,
+      time:   w => `${w} ${sizes.time}px ${fontStack()}`,
+      note:   w => `${w} ${sizes.note}px ${fontStack()}`,
+      footer: w => `${w} ${sizes.footer}px ${fontStack()}`,
     };
 
     const state = {
@@ -154,7 +182,6 @@
         cap:  $('cap').value  || '8 persons',
         aud:  $('aud').value  || 'Staff, Student',
       },
-      // Initial positions approximate your mock
       pos: {
         room: {x: 32,  y: 24},
         sub:  {x: 32,  y: 200 - 72},
@@ -167,15 +194,14 @@
       }
     };
 
-    // Define items for drawing and hit testing
     function itemList(){
       const colorForStatus = state.text.status === 'AVAILABLE' ? state.avail : state.busy;
       return [
-        {key:'room',   text:state.text.room,   font:fonts.room('900'),   color:'#000',       align:'left',   x:state.pos.room.x,   y:state.pos.room.y},
-        {key:'sub',    text:state.text.sub,    font:fonts.sub('800'),    color:'#000',       align:'left',   x:state.pos.sub.x,    y:state.pos.sub.y},
-        {key:'note',   text:state.text.note,   font:fonts.note('600'),   color:'#000',       align:state.pos.note.align||'center', x:state.pos.note.x, y:state.pos.note.y},
-        {key:'status', text:state.text.status, font:fonts.status('900'), color:colorForStatus, align:'left',  x:state.pos.status.x, y:state.pos.status.y},
-        {key:'time',   text:state.text.time,   font:fonts.time('900'),   color:'#000',       align:'left',   x:state.pos.time.x,   y:state.pos.time.y},
+        {key:'room',   text:state.text.room,   font:fonts.room('900'),   color:'#000', align:'left',   x:state.pos.room.x,   y:state.pos.room.y},
+        {key:'sub',    text:state.text.sub,    font:fonts.sub('800'),    color:'#000', align:'left',   x:state.pos.sub.x,    y:state.pos.sub.y},
+        {key:'note',   text:state.text.note,   font:fonts.note('600'),   color:'#000', align:state.pos.note.align||'center', x:state.pos.note.x, y:state.pos.note.y},
+        {key:'status', text:state.text.status, font:fonts.status('900'), color:colorForStatus, align:'left', x:state.pos.status.x, y:state.pos.status.y},
+        {key:'time',   text:state.text.time,   font:fonts.time('900'),   color:'#000', align:'left',   x:state.pos.time.x,   y:state.pos.time.y},
         {key:'cap',    text:'Capacity: ' + state.text.cap, font:fonts.footer('600'), color:'#000', align:'left', x:state.pos.cap.x, y:state.pos.cap.y},
         {key:'aud',    text:'Available to: ' + state.text.aud, font:fonts.footer('600'), color:'#000', align:state.pos.aud.align||'center', x:state.pos.aud.x, y:state.pos.aud.y},
         {key:'date',   text:state.text.date,   font:fonts.footer('600'), color:'#000', align:state.pos.date.align||'right', x:state.pos.date.x, y:state.pos.date.y},
@@ -184,15 +210,12 @@
 
     function draw(context=ctx){
       const w=1600, h=900;
-      // background
       context.clearRect(0,0,w,h);
       context.fillStyle = '#fff';
       context.fillRect(0,0,w,h);
-      // banner
       context.fillStyle = state.accent;
       context.fillRect(0,0,w,200);
 
-      // draw items
       for(const it of itemList()){
         context.textBaseline = 'top';
         context.textAlign = it.align;
@@ -202,128 +225,55 @@
       }
     }
 
-    // Hit testing for drag
-    function measureBox(ctx, it){
-      ctx.font = it.font;
-      const metrics = ctx.measureText(it.text);
-      const w = metrics.width;
-      const size = parseInt(it.font.split(' ')[1], 10) || 24;
-      const h = size * 1.2;
-      let x = it.x, y = it.y;
-      if(it.align === 'center') x = x - w/2;
-      if(it.align === 'right')  x = x - w;
-      return {x, y, w, h};
-    }
-
-    let dragging = null;
-    let dragOffset = {dx:0, dy:0};
-
-    function pickItem(px, py){
-      const items = itemList().slice().reverse(); // pick topmost last drawn
-      for(const it of items){
-        const box = measureBox(ctx, it);
-        if(px >= box.x && px <= box.x+box.w && py >= box.y && py <= box.y+box.h){
-          return it.key;
-        }
-      }
-      return null;
-    }
-
-    function canvasPoint(e){
-      const r = c.getBoundingClientRect();
-      const scaleX = c.width / r.width;
-      const scaleY = c.height / r.height;
-      const x = (e.clientX - r.left) * scaleX;
-      const y = (e.clientY - r.top)  * scaleY;
-      return {x, y};
-    }
+    // Drag to move
+    const boxOf = (ctx, it) => { ctx.font = it.font; const m = ctx.measureText(it.text); const size = parseInt(it.font.split(' ')[1],10)||24; const h = size*1.2; let x=it.x; if(it.align==='center') x-=m.width/2; if(it.align==='right') x-=m.width; return {x, y:it.y, w:m.width, h}; };
+    const pt = e => { const r=c.getBoundingClientRect(); return { x:(e.clientX-r.left)*c.width/r.width, y:(e.clientY-r.top)*c.height/r.height }; };
+    let dragging=null, dOff={dx:0,dy:0};
+    const pick = (x,y)=>{ const items=itemList().slice().reverse(); for(const it of items){const b=boxOf(ctx,it); if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h) return it.key;} return null; };
 
     c.addEventListener('pointerdown', e=>{
       c.setPointerCapture(e.pointerId);
-      const p = canvasPoint(e);
-      const key = pickItem(p.x, p.y);
-      if(!key) return;
-      dragging = key;
-      const it = itemList().find(x=>x.key===key);
-      const box = measureBox(ctx, it);
-      dragOffset.dx = p.x - box.x;
-      dragOffset.dy = p.y - box.y;
-      c.style.cursor = 'grabbing';
+      const p=pt(e); const key=pick(p.x,p.y); if(!key) return;
+      dragging=key; const it=itemList().find(i=>i.key===key); const b=boxOf(ctx,it);
+      dOff.dx=p.x-b.x; dOff.dy=p.y-b.y; c.style.cursor='grabbing';
     });
-
     c.addEventListener('pointermove', e=>{
       if(!dragging) return;
-      const p = canvasPoint(e);
-      const it = itemList().find(x=>x.key===dragging);
-      const box = measureBox(ctx, it);
-      let newX = p.x - dragOffset.dx;
-      let newY = p.y - dragOffset.dy;
-      // convert box top-left back to anchor based on align
-      if(it.align === 'center') newX = newX + box.w/2;
-      if(it.align === 'right')  newX = newX + box.w;
-      state.pos[dragging].x = newX;
-      state.pos[dragging].y = newY;
-      draw();
+      const p=pt(e); const it=itemList().find(i=>i.key===dragging); const b=boxOf(ctx,it);
+      let nx=p.x-dOff.dx, ny=p.y-dOff.dy;
+      if(it.align==='center') nx+=b.w/2; if(it.align==='right') nx+=b.w;
+      state.pos[dragging].x=nx; state.pos[dragging].y=ny; draw();
     });
+    c.addEventListener('pointerup', ()=>{ dragging=null; c.style.cursor='grab'; });
 
-    c.addEventListener('pointerup', e=>{
-      dragging = null;
-      c.style.cursor = 'grab';
-    });
-
-    // Bind text inputs
-    const bindText = (id, key) => {
-      const el = $(id);
-      el.addEventListener('input', ()=>{ state.text[key] = el.value; draw(); });
-    };
-    bindText('room','room'); bindText('subroom','sub'); bindText('time','time');
-    bindText('note','note'); bindText('date','date'); bindText('cap','cap'); bindText('aud','aud');
+    // Bind text
+    const bindText = (id, key) => $(id).addEventListener('input', ()=>{ state.text[key] = $(id).value; draw(); });
+    bindText('room','room'); bindText('subroom','sub'); bindText('time','time'); bindText('note','note'); bindText('date','date'); bindText('cap','cap'); bindText('aud','aud');
     $('status').addEventListener('change', ()=>{ state.text.status = $('status').value.toUpperCase(); draw(); });
 
-    // Bind colors
-    $('accent').addEventListener('input', ()=>{ state.accent = $('accent').value; draw(); });
-    $('statusColorBusy').addEventListener('input', ()=>{ state.busy = $('statusColorBusy').value; draw(); });
-    $('statusColorAvail').addEventListener('input', ()=>{ state.avail = $('statusColorAvail').value; draw(); });
+    // Colors
+    $('accent').addEventListener('input', ()=>{ state.accent=$('accent').value; draw(); });
+    $('statusColorBusy').addEventListener('input', ()=>{ state.busy=$('statusColorBusy').value; draw(); });
+    $('statusColorAvail').addEventListener('input', ()=>{ state.avail=$('statusColorAvail').value; draw(); });
 
-    // Bind size inputs
-    $('size-room').addEventListener('input', ()=>{ sizes.room = +$('size-room').value; draw(); });
-    $('size-sub').addEventListener('input', ()=>{ sizes.sub = +$('size-sub').value; draw(); });
-    $('size-status').addEventListener('input', ()=>{ sizes.status = +$('size-status').value; draw(); });
-    $('size-time').addEventListener('input', ()=>{ sizes.time = +$('size-time').value; draw(); });
-    $('size-note').addEventListener('input', ()=>{ sizes.note = +$('size-note').value; draw(); });
-    $('size-footer').addEventListener('input', ()=>{ sizes.footer = +$('size-footer').value; draw(); });
+    // Sizes
+    const sizeBind = (id, key) => $(id).addEventListener('input', ()=>{ sizes[key] = +$(id).value; draw(); });
+    sizeBind('size-room','room'); sizeBind('size-sub','sub'); sizeBind('size-status','status'); sizeBind('size-time','time'); sizeBind('size-note','note'); sizeBind('size-footer','footer');
+
+    // Font family controls
+    $('fontFamily').addEventListener('change', ()=>{ fontState.base = $('fontFamily').value; draw(); });
+    $('customFont').addEventListener('input', ()=>{ fontState.custom = $('customFont').value; draw(); });
 
     // Download, copy, fullscreen
-    $('download').addEventListener('click', ()=>{
-      const a = document.createElement('a');
-      a.download = 'room-sign.png';
-      a.href = c.toDataURL('image/png');
-      a.click();
-    });
-    $('copy').addEventListener('click', async ()=>{
-      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-      try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('Copied to clipboard'); }
-      catch { alert('Copy failed. Use Download instead.'); }
-    });
-    $('fullscreen').addEventListener('click', ()=>{
-      draw(fctx);
-      fullOverlay.style.display='flex';
-      fullOverlay.requestFullscreen?.();
-    });
-    fullOverlay.addEventListener('click', ()=>{
-      document.exitFullscreen?.();
-      fullOverlay.style.display='none';
-    });
+    $('download').addEventListener('click', ()=>{ const a=document.createElement('a'); a.download='room-sign.png'; a.href=c.toDataURL('image/png'); a.click(); });
+    $('copy').addEventListener('click', async ()=>{ const blob=await new Promise(r=>c.toBlob(r,'image/png')); try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); alert('Copied to clipboard'); } catch{ alert('Copy failed. Use Download instead.'); } });
+    $('fullscreen').addEventListener('click', ()=>{ draw(fctx); fullOverlay.style.display='flex'; fullOverlay.requestFullscreen?.(); });
+    fullOverlay.addEventListener('click', ()=>{ document.exitFullscreen?.(); fullOverlay.style.display='none'; });
 
-    // Initial defaults to match placeholders
-    $('room').value    = state.text.room;
-    $('subroom').value = state.text.sub;
-    $('status').value  = state.text.status;
-    $('time').value    = state.text.time;
-    $('note').value    = state.text.note;
-    $('date').value    = state.text.date;
-    $('cap').value     = state.text.cap;
-    $('aud').value     = state.text.aud;
+    // Defaults into inputs
+    $('room').value = state.text.room; $('subroom').value = state.text.sub; $('status').value = state.text.status;
+    $('time').value = state.text.time; $('note').value = state.text.note; $('date').value = state.text.date;
+    $('cap').value = state.text.cap; $('aud').value = state.text.aud;
 
     draw();
   </script>
