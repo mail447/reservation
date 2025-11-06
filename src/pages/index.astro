@@ -5,51 +5,33 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Room Sign Editor</title>
+<title>Sign Editor — Font Test</title>
 <style>
-  :root { --gap: 12px; }
-  html, body { margin:0; height:100%; background:#0b0f19; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif; }
-  .wrap { max-width:1250px; margin:24px auto; padding:0 16px; display:grid; gap:16px; grid-template-columns: 1.1fr .9fr; }
-  @media (max-width: 1100px){ .wrap{ grid-template-columns: 1fr; } }
-  .card { background:#141a2a; border:1px solid #232a45; border-radius:14px; padding:12px; }
-  label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
-  input, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3355; background:#0b0f19; color:#fff; }
-  button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
-  .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
-  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
-  canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; touch-action:none; cursor:grab; }
-  table { width:100%; border-collapse:separate; border-spacing:0 8px; }
-  th, td { font-size:13px; text-align:left; }
-  th { opacity:.85; }
-  td > input[type="number"]{ width:90px; }
-  td > input[type="checkbox"]{ width:18px; height:18px; }
-  td > select.font { min-width:160px; }
-  .controls h3 { margin: 10px 0; font-size:14px; opacity:.9; }
-  #fullscreen-overlay { display:none; position:fixed; inset:0; background:#000; z-index:9999; align-items:center; justify-content:center; }
-  #fullscreen-overlay canvas { width:92vw; height:auto; background:#fff; border:0; }
+  html,body{margin:0;height:100%;background:#0b0f19;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif}
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px;display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
+  @media (max-width:1000px){.wrap{grid-template-columns:1fr}}
+  .card{background:#141a2a;border:1px solid #232a45;border-radius:14px;padding:12px}
+  label{font-size:12px;opacity:.9;display:block;margin-bottom:6px}
+  select,input,button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a3355;background:#0b0f19;color:#fff}
+  canvas{width:100%;height:auto;background:#fff;border:1px solid #232a45;border-radius:10px}
+  h2{margin:6px 0 10px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <canvas id="c" width="1600" height="900" aria-label="preview"></canvas>
-      <div class="row" style="margin-top:12px">
+      <canvas id="cv" width="1600" height="900"></canvas>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+        <button id="download">Download PNG</button>
         <button id="fullscreen">Full screen</button>
-        <div style="display:flex; gap:8px">
-          <button id="download">Download PNG</button>
-          <button id="copy">Copy</button>
-        </div>
       </div>
-      <p style="opacity:.8; font-size:12px; margin:8px 0">Tip: drag any text on the image to reposition. Click the image to go full screen.</p>
     </div>
-
-    <div class="card controls">
-      <!-- Fonts first so you can see them immediately -->
-      <h3>Fonts</h3>
-      <div class="row">
+    <div class="card">
+      <h2>Fonts</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div>
           <label for="fontGlobal">Global font family</label>
-          <select id="fontGlobal" class="font">
+          <select id="fontGlobal">
             <option value="system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif">System UI</option>
             <option value="Arial, Helvetica, sans-serif">Arial</option>
             <option value="Verdana, Geneva, sans-serif">Verdana</option>
@@ -62,257 +44,95 @@
         </div>
         <div>
           <label for="fontCustom">Custom font name (optional)</label>
-          <input id="fontCustom" type="text" placeholder="e.g., Inter, Poppins" />
+          <input id="fontCustom" placeholder="e.g., Inter, Poppins" />
         </div>
       </div>
 
-      <h3 style="margin-top:16px">Text content</h3>
-      <div class="row">
-        <div><label for="room">Room title</label><input id="room" type="text" placeholder="R105 Projekti S" /></div>
-        <div><label for="subroom">Sub room</label><input id="subroom" type="text" placeholder="R103" /></div>
-      </div>
-      <div class="row" style="margin-top:var(--gap)">
+      <h2 style="margin-top:16px">Text</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label for="room">Room title</label><input id="room" value="R105 Projekti S" /></div>
         <div><label for="status">Status</label><select id="status"><option>BUSY</option><option>AVAILABLE</option></select></div>
-        <div><label for="time">Time range</label><input id="time" type="text" placeholder="15:00 - 18:00" /></div>
       </div>
-      <div class="row" style="margin-top:var(--gap)">
-        <div><label for="note">Center note</label><input id="note" type="text" placeholder="Your paragraph text" /></div>
-        <div><label for="date">Date</label><input id="date" type="text" placeholder="dd/mm/yyyy" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+        <div><label>Room size</label><input id="size-room" type="number" min="24" max="300" value="120" /></div>
+        <div><label>Bold</label><input id="bold-room" type="checkbox" checked /></div>
+        <div><label>Move text by drag</label><button id="reset">Reset position</button></div>
       </div>
-      <div class="row" style="margin-top:var(--gap)">
-        <div><label for="cap">Capacity</label><input id="cap" type="text" placeholder="8 persons" /></div>
-        <div><label for="aud">Available to</label><input id="aud" type="text" placeholder="Staff, Student" /></div>
-      </div>
-
-      <h3 style="margin-top:16px">Colors</h3>
-      <div class="row3">
-        <div><label for="accent">Accent color</label><input id="accent" type="color" value="#bd4c52" /></div>
-        <div><label for="statusColorBusy">Busy color</label><input id="statusColorBusy" type="color" value="#cf676e" /></div>
-        <div><label for="statusColorAvail">Available color</label><input id="statusColorAvail" type="color" value="#26a65b" /></div>
-      </div>
-
-      <h3 style="margin-top:16px">Per item styling</h3>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:120px">Item</th>
-            <th style="width:110px">Size</th>
-            <th style="width:70px">Bold</th>
-            <th>Font override</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-k="room">
-            <td>Room</td>
-            <td><input type="number" id="size-room" min="24" max="300" value="120"></td>
-            <td><input type="checkbox" id="bold-room" checked></td>
-            <td>
-              <select id="font-room" class="font">
-                <option value="">Inherit</option>
-                <option value="Arial, Helvetica, sans-serif">Arial</option>
-                <option value="Verdana, Geneva, sans-serif">Verdana</option>
-                <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
-                <option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option>
-                <option value="Georgia, serif">Georgia</option>
-                <option value="'Times New Roman', Times, serif">Times New Roman</option>
-                <option value="'Courier New', Courier, monospace">Courier New</option>
-              </select>
-            </td>
-          </tr>
-          <tr data-k="sub">
-            <td>Sub</td>
-            <td><input type="number" id="size-sub" min="20" max="220" value="56"></td>
-            <td><input type="checkbox" id="bold-sub" checked></td>
-            <td><select id="font-sub" class="font"><option value="">Inherit</option><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Tahoma, Geneva, sans-serif">Tahoma</option><option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Courier New', Courier, monospace">Courier New</option></select></td>
-          </tr>
-          <tr data-k="status">
-            <td>Status</td>
-            <td><input type="number" id="size-status" min="40" max="320" value="160"></td>
-            <td><input type="checkbox" id="bold-status" checked></td>
-            <td><select id="font-status" class="font"><option value="">Inherit</option><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Tahoma, Geneva, sans-serif">Tahoma</option><option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Courier New', Courier, monospace">Courier New</option></select></td>
-          </tr>
-          <tr data-k="time">
-            <td>Time</td>
-            <td><input type="number" id="size-time" min="20" max="220" value="64"></td>
-            <td><input type="checkbox" id="bold-time" checked></td>
-            <td><select id="font-time" class="font"><option value="">Inherit</option><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Tahoma, Geneva, sans-serif">Tahoma</option><option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Courier New', Courier, monospace">Courier New</option></select></td>
-          </tr>
-          <tr data-k="note">
-            <td>Note</td>
-            <td><input type="number" id="size-note" min="16" max="160" value="28"></td>
-            <td><input type="checkbox" id="bold-note"></td>
-            <td><select id="font-note" class="font"><option value="">Inherit</option><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Tahoma, Geneva, sans-serif">Tahoma</option><option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Courier New', Courier, monospace">Courier New</option></select></td>
-          </tr>
-          <tr data-k="footer">
-            <td>Footer</td>
-            <td><input type="number" id="size-footer" min="16" max="120" value="36"></td>
-            <td><input type="checkbox" id="bold-footer"></td>
-            <td><select id="font-footer" class="font"><option value="">Inherit</option><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Tahoma, Geneva, sans-serif">Tahoma</option><option value="'Trebuchet MS', Helvetica, sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Courier New', Courier, monospace">Courier New</option></select></td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 
-  <div id="fullscreen-overlay"><canvas id="fullCanvas" width="1600" height="900"></canvas></div>
+  <div id="fs" style="display:none;position:fixed;inset:0;background:#000;align-items:center;justify-content:center;z-index:9999">
+    <canvas id="fsCanvas" width="1600" height="900"></canvas>
+  </div>
 
   <script>
     const $ = id => document.getElementById(id);
-    const c = $('c'), ctx = c.getContext('2d');
-    const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
+    const cv = $('cv'), ctx = cv.getContext('2d');
+    const fsWrap = $('fs'), fsCanvas = $('fsCanvas'), fctx = fsCanvas.getContext('2d');
 
     const S = {
-      accent: $('accent').value,
-      busy: $('statusColorBusy').value,
-      avail: $('statusColorAvail').value,
-      text: { room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00', note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student' },
-      pos:{ room:{x:32,y:24}, sub:{x:32,y:128}, note:{x:800,y:210,align:'center'}, status:{x:32,y:270}, time:{x:32,y:440}, cap:{x:32,y:820}, aud:{x:800,y:820,align:'center'}, date:{x:1568,y:820,align:'right'} },
-      size:{ room:120, sub:56, status:160, time:64, note:28, footer:36 },
-      bold:{ room:true, sub:true, status:true, time:true, note:false, footer:false },
-      fontGlobal:"system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif",
-      fontCustom:"",
-      fontOverride:{ room:"", sub:"", status:"", time:"", note:"", footer:"" }
+      fontGlobal: $('fontGlobal').value,
+      fontCustom: '',
+      text: { room: $('room').value, status: 'BUSY' },
+      size: { room: 120 },
+      bold: { room: true },
+      pos: { room: {x: 32, y: 24} }
     };
 
-    function fontFamilyFor(key){
-      const over = S.fontOverride[key] || "";
-      const base = S.fontCustom.trim() ? S.fontCustom.trim() : S.fontGlobal;
-      return over || base;
-    }
-    function weightFor(k){
-      if (k==='cap'||k==='aud'||k==='date') return S.bold.footer ? '900' : '400';
-      return S.bold[k] ? '900' : '400';
-    }
-    function fontOf(k){
-      const size = (k==='cap'||k==='aud'||k==='date') ? S.size.footer : S.size[k];
-      return `${weightFor(k)} ${size}px ${fontFamilyFor(k)}`;
-    }
+    function fontFamily(){ return S.fontCustom.trim() ? S.fontCustom.trim() : S.fontGlobal; }
+    function fontOfRoom(){ return `${S.bold.room ? '900':'400'} ${S.size.room}px ${fontFamily()}`; }
 
-    function items(){
-      const col = S.text.status==='AVAILABLE' ? S.avail : S.busy;
-      return [
-        {k:'room', t:S.text.room, c:'#000', a:'left'},
-        {k:'sub',  t:S.text.sub,  c:'#000', a:'left'},
-        {k:'note', t:S.text.note, c:'#000', a:S.pos.note.align||'center'},
-        {k:'status',t:S.text.status,c:col,  a:'left'},
-        {k:'time', t:S.text.time, c:'#000', a:'left'},
-        {k:'cap',  t:'Capacity: '+S.text.cap, c:'#000', a:'left'},
-        {k:'aud',  t:'Available to: '+S.text.aud, c:'#000', a:S.pos.aud.align||'center'},
-        {k:'date', t:S.text.date, c:'#000', a:S.pos.date.align||'right'}
-      ];
-    }
-
-    function draw(context=ctx){
+    function draw(context = ctx){
       const w=1600,h=900;
       context.clearRect(0,0,w,h);
       context.fillStyle='#fff'; context.fillRect(0,0,w,h);
-      context.fillStyle=S.accent; context.fillRect(0,0,w,200);
-      for(const it of items()){
-        context.textBaseline='top';
-        context.textAlign=it.a;
-        context.fillStyle=it.c;
-        context.font = fontOf(it.k);
-        context.fillText(it.t, S.pos[it.k].x, S.pos[it.k].y);
-      }
+      context.fillStyle = S.text.status === 'AVAILABLE' ? '#26a65b' : '#cf676e';
+      context.fillRect(0,0,w,200);
+
+      context.textBaseline='top';
+      context.textAlign='left';
+      context.fillStyle='#000';
+      context.font = fontOfRoom();
+      context.fillText(S.text.room, S.pos.room.x, S.pos.room.y);
     }
 
-    // Dragging
-    const pt=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};};
-    function boxOf(k,t,a){
-      ctx.font = fontOf(k);
-      const m = ctx.measureText(t);
-      const sz = (k==='cap'||k==='aud'||k==='date') ? S.size.footer : S.size[k];
-      const h = sz*1.2;
-      let x = S.pos[k].x;
-      if(a==='center') x -= m.width/2;
-      if(a==='right')  x -= m.width;
-      return {x,y:S.pos[k].y,w:m.width,h};
+    // Bindings
+    $('fontGlobal').addEventListener('change', ()=>{ S.fontGlobal=$('fontGlobal').value; draw(); });
+    $('fontCustom').addEventListener('input', ()=>{ S.fontCustom=$('fontCustom').value; draw(); });
+    $('room').addEventListener('input', ()=>{ S.text.room=$('room').value; draw(); });
+    $('status').addEventListener('change', ()=>{ S.text.status=$('status').value; draw(); });
+    $('size-room').addEventListener('input', ()=>{ S.size.room=+$('size-room').value; draw(); });
+    $('bold-room').addEventListener('change', ()=>{ S.bold.room=$('bold-room').checked; draw(); });
+    $('reset').addEventListener('click', ()=>{ S.pos.room = {x:32,y:24}; draw(); });
+
+    // Drag
+    const pt = e => { const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+    function boxOfRoom(){
+      ctx.font = fontOfRoom();
+      const w = ctx.measureText(S.text.room).width, h = S.size.room*1.2;
+      return { x:S.pos.room.x, y:S.pos.room.y, w, h };
     }
-    const pick=(x,y)=>{
-      const order=['date','aud','cap','time','status','note','sub','room'];
-      for(const k of order){
-        const it = items().find(i=>i.k===k);
-        const b = boxOf(k,it.t,it.a);
-        if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h) return k;
+    let drag=false, off={dx:0,dy:0};
+    cv.addEventListener('pointerdown', e=>{
+      cv.setPointerCapture(e.pointerId);
+      const p=pt(e), b=boxOfRoom();
+      if(p.x>=b.x && p.x<=b.x+b.w && p.y>=b.y && p.y<=b.y+b.h){
+        drag=true; off.dx=p.x-b.x; off.dy=p.y-b.y;
       }
-      return null;
-    };
-    let dragging=null, off={dx:0,dy:0};
-    c.addEventListener('pointerdown',e=>{
-      c.setPointerCapture(e.pointerId);
-      const p=pt(e), k=pick(p.x,p.y);
-      if(!k) return;
-      dragging=k;
-      const it = items().find(i=>i.k===k);
-      const b = boxOf(k,it.t,it.a);
-      off.dx=p.x-b.x; off.dy=p.y-b.y;
-      c.style.cursor='grabbing';
     });
-    c.addEventListener('pointermove',e=>{
-      if(!dragging) return;
+    cv.addEventListener('pointermove', e=>{
+      if(!drag) return;
       const p=pt(e);
-      const it = items().find(i=>i.k===dragging);
-      const b = boxOf(dragging,it.t,it.a);
-      let nx=p.x-off.dx, ny=p.y-off.dy;
-      const align = S.pos[dragging].align || it.a;
-      if(align==='center') nx+=b.w/2;
-      if(align==='right')  nx+=b.w;
-      S.pos[dragging].x=nx; S.pos[dragging].y=ny;
+      S.pos.room.x = p.x - off.dx;
+      S.pos.room.y = p.y - off.dy;
       draw();
     });
-    c.addEventListener('pointerup',()=>{ dragging=null; c.style.cursor='grab'; });
+    cv.addEventListener('pointerup', ()=>{ drag=false; });
 
-    // Text inputs
-    const bindText = (id,key) => $(id).addEventListener('input', ()=>{ S.text[key]=$(id).value; draw(); });
-    bindText('room','room'); bindText('subroom','sub'); bindText('time','time');
-    bindText('note','note'); bindText('date','date'); bindText('cap','cap'); bindText('aud','aud');
-    $('status').addEventListener('change', ()=>{ S.text.status=$('status').value.toUpperCase(); draw(); });
-
-    // Colors
-    $('accent').addEventListener('input', ()=>{ S.accent=$('accent').value; draw(); });
-    $('statusColorBusy').addEventListener('input', ()=>{ S.busy=$('statusColorBusy').value; draw(); });
-    $('statusColorAvail').addEventListener('input', ()=>{ S.avail=$('statusColorAvail').value; draw(); });
-
-    // Fonts
-    $('fontGlobal').addEventListener('change', ()=>{ S.fontGlobal = $('fontGlobal').value; draw(); });
-    $('fontCustom').addEventListener('input', ()=>{ S.fontCustom = $('fontCustom').value; draw(); });
-    const fontKeys = ['room','sub','status','time','note','footer'];
-    fontKeys.forEach(k=>{
-      const sel = $('font-'+k);
-      sel.addEventListener('change', ()=>{ S.fontOverride[k] = sel.value; draw(); });
-    });
-
-    // Sizes
-    const sizeBind=(id,key)=>$(id).addEventListener('input', ()=>{ S.size[key]=+$(id).value; draw(); });
-    sizeBind('size-room','room');
-    sizeBind('size-sub','sub');
-    sizeBind('size-status','status');
-    sizeBind('size-time','time');
-    sizeBind('size-note','note');
-    sizeBind('size-footer','footer');
-
-    // Bold toggles
-    const boldBind=(id,key)=>$(id).addEventListener('change', ()=>{ S.bold[key]=$(id).checked; draw(); });
-    boldBind('bold-room','room');
-    boldBind('bold-sub','sub');
-    boldBind('bold-status','status');
-    boldBind('bold-time','time');
-    boldBind('bold-note','note');
-    boldBind('bold-footer','footer');
-
-    // Download / Copy / Fullscreen
-    $('download').addEventListener('click',()=>{ const a=document.createElement('a'); a.download='room-sign.png'; a.href=c.toDataURL('image/png'); a.click(); });
-    $('copy').addEventListener('click', async()=>{ const blob=await new Promise(r=>c.toBlob(r,'image/png')); try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); alert('Copied'); } catch{ alert('Copy failed'); } });
-    function openFs(){ draw(fctx); fullOverlay.style.display='flex'; fullOverlay.requestFullscreen?.(); }
-    $('fullscreen').addEventListener('click', openFs);
-    c.addEventListener('click', openFs);
-    fullOverlay.addEventListener('click', ()=>{ document.exitFullscreen?.(); fullOverlay.style.display='none'; });
-
-    // Initialize defaults
-    $('fontGlobal').value = S.fontGlobal;
-    $('room').value=S.text.room; $('subroom').value=S.text.sub; $('status').value=S.text.status;
-    $('time').value=S.text.time; $('note').value=S.text.note; $('date').value=S.text.date;
-    $('cap').value=S.text.cap; $('aud').value=S.text.aud;
+    // Download and Fullscreen
+    $('download').addEventListener('click', ()=>{ const a=document.createElement('a'); a.download='sign.png'; a.href=cv.toDataURL('image/png'); a.click(); });
+    $('fullscreen').addEventListener('click', ()=>{ draw(fctx); fsWrap.style.display='flex'; fsWrap.requestFullscreen?.(); });
+    fsWrap.addEventListener('click', ()=>{ document.exitFullscreen?.(); fsWrap.style.display='none'; });
 
     draw();
   </script>
