@@ -17,14 +17,18 @@
     button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
     .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
     .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
-    canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; }
+    canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; cursor:pointer; }
     .hint{ font-size:12px; opacity:.8; margin-top:8px }
+    #fullscreen-overlay {
+      display:none; position:fixed; inset:0; background:#000; z-index:9999;
+      align-items:center; justify-content:center;
+    }
+    #fullscreen-overlay canvas { width:90vw; height:auto; border:0; background:#fff; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <!-- 1600x900 matches the look of your mockup -->
       <canvas id="c" width="1600" height="900" aria-label="preview"></canvas>
     </div>
 
@@ -92,154 +96,111 @@
       </div>
 
       <div class="row" style="margin-top:var(--gap)">
+        <button id="fullscreen">Full screen</button>
         <button id="download">Download PNG</button>
         <button id="copy">Copy to clipboard</button>
       </div>
 
       <p class="hint">
-        Share presets via URL, for example:
-        <code>?room=R105 Projekti S&sub=R103&status=BUSY&time=15:00%20-%2018:00&cap=8%20persons&aud=Staff,%20Student&date=01/12/2025&note=Your%20paragraph%20text</code>
+        Click “Full screen” or the preview image to view at full size.
       </p>
     </div>
+  </div>
+
+  <div id="fullscreen-overlay">
+    <canvas id="fullCanvas" width="1600" height="900"></canvas>
   </div>
 
   <script>
     const c = document.getElementById('c');
     const ctx = c.getContext('2d');
+    const fullOverlay = document.getElementById('fullscreen-overlay');
+    const fullCanvas = document.getElementById('fullCanvas');
+    const fctx = fullCanvas.getContext('2d');
 
-    // State
-    const S = {
-      room: 'R105 Projekti S',
-      sub: 'R103',
-      status: 'BUSY',
-      time: '15:00 - 18:00',
-      note: 'Your paragraph text',
-      date: 'dd/mm/yyyy',
-      cap: '8 persons',
-      aud: 'Staff, Student',
-      accent: '#bd4c52',
-      busy: '#cf676e',
-      avail: '#26a65b',
-    };
+    const S = { room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00', note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student', accent:'#bd4c52', busy:'#cf676e', avail:'#26a65b' };
 
     const el = {
-      room: document.getElementById('room'),
-      sub: document.getElementById('subroom'),
-      status: document.getElementById('status'),
-      time: document.getElementById('time'),
-      note: document.getElementById('note'),
-      date: document.getElementById('date'),
-      cap: document.getElementById('cap'),
-      aud: document.getElementById('aud'),
-      accent: document.getElementById('accent'),
-      busy: document.getElementById('statusColorBusy'),
-      avail: document.getElementById('statusColorAvail'),
-      download: document.getElementById('download'),
-      copy: document.getElementById('copy'),
+      room:room, sub:subroom, status:status, time:time, note:note,
+      date:date, cap:cap, aud:aud, accent:accent,
+      busy:statusColorBusy, avail:statusColorAvail,
+      download:download, copy:copy, fullscreen:fullscreen
     };
 
-    // Load from URL params
-    const p = new URLSearchParams(location.search);
-    if (p.get('room')) S.room = p.get('room');
-    if (p.get('sub')) S.sub = p.get('sub');
-    if (p.get('status')) S.status = p.get('status').toUpperCase() === 'AVAILABLE' ? 'AVAILABLE' : 'BUSY';
-    if (p.get('time')) S.time = p.get('time');
-    if (p.get('note')) S.note = p.get('note');
-    if (p.get('date')) S.date = p.get('date');
-    if (p.get('cap')) S.cap = p.get('cap');
-    if (p.get('aud')) S.aud = p.get('aud');
-    if (p.get('accent')) S.accent = p.get('accent');
-    if (p.get('busy')) S.busy = p.get('busy');
-    if (p.get('avail')) S.avail = p.get('avail');
-
-    // Hydrate inputs
-    el.room.value = S.room; el.sub.value = S.sub; el.status.value = S.status;
-    el.time.value = S.time; el.note.value = S.note; el.date.value = S.date;
-    el.cap.value = S.cap; el.aud.value = S.aud;
-    el.accent.value = S.accent; el.busy.value = S.busy; el.avail.value = S.avail;
-
-    function draw() {
-      // Clear white background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0,0,c.width,c.height);
-
-      // Top banner
-      const bannerH = 200;
-      ctx.fillStyle = S.accent;
-      ctx.fillRect(0,0,c.width,bannerH);
-
-      // Room title
-      ctx.fillStyle = '#000';
-      ctx.textBaseline = 'top';
-      ctx.textAlign = 'left';
-      ctx.font = '900 120px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText(truncate(S.room, 32), 32, 24);
-
-      // Sub room
-      ctx.font = '800 56px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText(truncate(S.sub, 16), 32, bannerH - 72);
-
-      // Center note
-      ctx.textAlign = 'center';
-      ctx.font = '600 28px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText(trimEmpty(S.note), c.width/2, bannerH + 10);
-
-      // Status block (large)
-      ctx.textAlign = 'left';
-      const statusColor = S.status === 'AVAILABLE' ? S.avail : S.busy;
-      ctx.fillStyle = statusColor;
-      ctx.font = '900 160px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText(S.status, 32, bannerH + 70);
-
-      // Time under status
-      ctx.fillStyle = '#000';
-      ctx.font = '900 64px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText(S.time, 32, bannerH + 240);
-
-      // Footer
-      const footerY = c.height - 80;
-      ctx.fillStyle = '#000';
-      ctx.textAlign = 'left';
-      ctx.font = '600 36px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      ctx.fillText('Capacity: ' + S.cap, 32, footerY);
-
-      ctx.textAlign = 'center';
-      ctx.fillText('Available to: ' + S.aud, c.width/2, footerY);
-
-      ctx.textAlign = 'right';
-      ctx.fillText(S.date, c.width - 32, footerY);
+    for(const [k,v] of Object.entries(el)){
+      if(['download','copy','fullscreen'].includes(k)) continue;
+      v.addEventListener('input',()=>{ S[k]=v.value; if(k==='status')S.status=v.value.toUpperCase(); draw(); });
     }
 
-    function truncate(s, n){ s = String(s); return s.length > n ? s.slice(0, n-1) + '…' : s; }
-    function trimEmpty(s){ s = String(s || ''); return s.trim() || ''; }
-
-    // Bind inputs
-    for (const [k,node] of Object.entries(el)) {
-      if (['download','copy'].includes(k)) continue;
-      node.addEventListener('input', () => {
-        S[k === 'sub' ? 'sub' : k] = node.value;
-        if (k === 'status') S.status = node.value.toUpperCase();
-        draw();
-      });
-      node.addEventListener('change', () => {
-        S[k === 'sub' ? 'sub' : k] = node.value;
-        if (k === 'status') S.status = node.value.toUpperCase();
-        draw();
-      });
-    }
-
-    el.download.addEventListener('click', ()=>{
-      const a = document.createElement('a');
-      a.download = 'room-sign.png';
-      a.href = c.toDataURL('image/png');
+    el.download.addEventListener('click',()=>{
+      const a=document.createElement('a');
+      a.download='room-sign.png';
+      a.href=c.toDataURL('image/png');
       a.click();
     });
 
-    el.copy.addEventListener('click', async ()=>{
-      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-      try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('Copied to clipboard'); }
-      catch(e){ alert('Copy failed. Use Download instead.'); }
+    el.copy.addEventListener('click',async()=>{
+      const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+      try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);alert('Copied to clipboard');}
+      catch(e){alert('Copy failed. Use Download instead.');}
     });
+
+    el.fullscreen.addEventListener('click',()=>toggleFullscreen());
+    c.addEventListener('click',()=>toggleFullscreen());
+
+    function toggleFullscreen(){
+      draw(fctx);
+      fullOverlay.style.display='flex';
+      fullOverlay.requestFullscreen?.();
+    }
+
+    fullOverlay.addEventListener('click',()=>{
+      document.exitFullscreen?.();
+      fullOverlay.style.display='none';
+    });
+
+    function draw(context=ctx){
+      const cw=1600,ch=900;
+      context.fillStyle='#fff';
+      context.fillRect(0,0,cw,ch);
+      const bannerH=200;
+      context.fillStyle=S.accent;
+      context.fillRect(0,0,cw,bannerH);
+
+      context.fillStyle='#000';
+      context.textBaseline='top';
+      context.textAlign='left';
+      context.font='900 120px system-ui';
+      context.fillText(S.room,32,24);
+
+      context.font='800 56px system-ui';
+      context.fillText(S.sub,32,bannerH-72);
+
+      context.textAlign='center';
+      context.font='600 28px system-ui';
+      context.fillText(S.note,cw/2,bannerH+10);
+
+      context.textAlign='left';
+      const color=S.status==='AVAILABLE'?S.avail:S.busy;
+      context.fillStyle=color;
+      context.font='900 160px system-ui';
+      context.fillText(S.status,32,bannerH+70);
+
+      context.fillStyle='#000';
+      context.font='900 64px system-ui';
+      context.fillText(S.time,32,bannerH+240);
+
+      const footerY=ch-80;
+      context.textAlign='left';
+      context.font='600 36px system-ui';
+      context.fillText('Capacity: '+S.cap,32,footerY);
+
+      context.textAlign='center';
+      context.fillText('Available to: '+S.aud,cw/2,footerY);
+
+      context.textAlign='right';
+      context.fillText(S.date,cw-32,footerY);
+    }
 
     draw();
   </script>
