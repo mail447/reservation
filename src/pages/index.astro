@@ -100,10 +100,7 @@
         <button id="download">Download PNG</button>
         <button id="copy">Copy to clipboard</button>
       </div>
-
-      <p class="hint">
-        Click “Full screen” or the preview image to view at full size.
-      </p>
+      <p class="hint">Click the preview or the button to enter full screen. Click anywhere to exit.</p>
     </div>
   </div>
 
@@ -112,96 +109,160 @@
   </div>
 
   <script>
-    const c = document.getElementById('c');
+    // helpers
+    const $ = (id) => document.getElementById(id);
+
+    const c = $('c');
     const ctx = c.getContext('2d');
-    const fullOverlay = document.getElementById('fullscreen-overlay');
-    const fullCanvas = document.getElementById('fullCanvas');
+
+    const fullOverlay = $('fullscreen-overlay');
+    const fullCanvas = $('fullCanvas');
     const fctx = fullCanvas.getContext('2d');
 
-    const S = { room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00', note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student', accent:'#bd4c52', busy:'#cf676e', avail:'#26a65b' };
-
-    const el = {
-      room:room, sub:subroom, status:status, time:time, note:note,
-      date:date, cap:cap, aud:aud, accent:accent,
-      busy:statusColorBusy, avail:statusColorAvail,
-      download:download, copy:copy, fullscreen:fullscreen
+    const inputs = {
+      room: $('room'),
+      sub: $('subroom'),
+      status: $('status'),
+      time: $('time'),
+      note: $('note'),
+      date: $('date'),
+      cap: $('cap'),
+      aud: $('aud'),
+      accent: $('accent'),
+      busy: $('statusColorBusy'),
+      avail: $('statusColorAvail'),
+      download: $('download'),
+      copy: $('copy'),
+      fullscreen: $('fullscreen')
     };
 
-    for(const [k,v] of Object.entries(el)){
-      if(['download','copy','fullscreen'].includes(k)) continue;
-      v.addEventListener('input',()=>{ S[k]=v.value; if(k==='status')S.status=v.value.toUpperCase(); draw(); });
+    const S = {
+      room: 'R105 Projekti S',
+      sub: 'R103',
+      status: 'BUSY',
+      time: '15:00 - 18:00',
+      note: 'Your paragraph text',
+      date: 'dd/mm/yyyy',
+      cap: '8 persons',
+      aud: 'Staff, Student',
+      accent: '#bd4c52',
+      busy: '#cf676e',
+      avail: '#26a65b'
+    };
+
+    // hydrate defaults into inputs
+    inputs.room.value = S.room;
+    inputs.sub.value = S.sub;
+    inputs.status.value = S.status;
+    inputs.time.value = S.time;
+    inputs.note.value = S.note;
+    inputs.date.value = S.date;
+    inputs.cap.value = S.cap;
+    inputs.aud.value = S.aud;
+    inputs.accent.value = S.accent;
+    inputs.busy.value = S.busy;
+    inputs.avail.value = S.avail;
+
+    function draw(context = ctx) {
+      const cw = 1600, ch = 900;
+      context.clearRect(0, 0, cw, ch);
+
+      // background
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, cw, ch);
+
+      // top banner
+      const bannerH = 200;
+      context.fillStyle = S.accent;
+      context.fillRect(0, 0, cw, bannerH);
+
+      // title
+      context.fillStyle = '#000';
+      context.textBaseline = 'top';
+      context.textAlign = 'left';
+      context.font = '900 120px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText(S.room, 32, 24);
+
+      // sub room
+      context.font = '800 56px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText(S.sub, 32, bannerH - 72);
+
+      // center note
+      context.textAlign = 'center';
+      context.font = '600 28px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText(S.note, cw / 2, bannerH + 10);
+
+      // status
+      context.textAlign = 'left';
+      context.fillStyle = S.status === 'AVAILABLE' ? S.avail : S.busy;
+      context.font = '900 160px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText(S.status, 32, bannerH + 70);
+
+      // time
+      context.fillStyle = '#000';
+      context.font = '900 64px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText(S.time, 32, bannerH + 240);
+
+      // footer
+      const footerY = ch - 80;
+      context.textAlign = 'left';
+      context.font = '600 36px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
+      context.fillText('Capacity: ' + S.cap, 32, footerY);
+
+      context.textAlign = 'center';
+      context.fillText('Available to: ' + S.aud, cw / 2, footerY);
+
+      context.textAlign = 'right';
+      context.fillText(S.date, cw - 32, footerY);
     }
 
-    el.download.addEventListener('click',()=>{
-      const a=document.createElement('a');
-      a.download='room-sign.png';
-      a.href=c.toDataURL('image/png');
+    // wire inputs
+    for (const [key, node] of Object.entries(inputs)) {
+      if (['download','copy','fullscreen'].includes(key)) continue;
+      node.addEventListener('input', () => {
+        const v = node.value;
+        if (key === 'status') S.status = v.toUpperCase();
+        else S[key] = v;
+        draw();
+      });
+    }
+
+    // download
+    inputs.download.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.download = 'room-sign.png';
+      a.href = c.toDataURL('image/png');
       a.click();
     });
 
-    el.copy.addEventListener('click',async()=>{
-      const blob=await new Promise(r=>c.toBlob(r,'image/png'));
-      try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);alert('Copied to clipboard');}
-      catch(e){alert('Copy failed. Use Download instead.');}
+    // copy
+    inputs.copy.addEventListener('click', async () => {
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        alert('Copied to clipboard');
+      } catch {
+        alert('Copy failed. Use Download instead.');
+      }
     });
 
-    el.fullscreen.addEventListener('click',()=>toggleFullscreen());
-    c.addEventListener('click',()=>toggleFullscreen());
-
-    function toggleFullscreen(){
+    // fullscreen
+    function openFullscreen() {
+      // draw to the fullscreen canvas so it is crisp
       draw(fctx);
-      fullOverlay.style.display='flex';
-      fullOverlay.requestFullscreen?.();
+      fullOverlay.style.display = 'flex';
+      if (fullOverlay.requestFullscreen) fullOverlay.requestFullscreen();
+    }
+    function closeFullscreen() {
+      fullOverlay.style.display = 'none';
+      if (document.fullscreenElement) document.exitFullscreen();
     }
 
-    fullOverlay.addEventListener('click',()=>{
-      document.exitFullscreen?.();
-      fullOverlay.style.display='none';
-    });
+    inputs.fullscreen.addEventListener('click', openFullscreen);
+    c.addEventListener('click', openFullscreen);
+    fullOverlay.addEventListener('click', closeFullscreen);
 
-    function draw(context=ctx){
-      const cw=1600,ch=900;
-      context.fillStyle='#fff';
-      context.fillRect(0,0,cw,ch);
-      const bannerH=200;
-      context.fillStyle=S.accent;
-      context.fillRect(0,0,cw,bannerH);
-
-      context.fillStyle='#000';
-      context.textBaseline='top';
-      context.textAlign='left';
-      context.font='900 120px system-ui';
-      context.fillText(S.room,32,24);
-
-      context.font='800 56px system-ui';
-      context.fillText(S.sub,32,bannerH-72);
-
-      context.textAlign='center';
-      context.font='600 28px system-ui';
-      context.fillText(S.note,cw/2,bannerH+10);
-
-      context.textAlign='left';
-      const color=S.status==='AVAILABLE'?S.avail:S.busy;
-      context.fillStyle=color;
-      context.font='900 160px system-ui';
-      context.fillText(S.status,32,bannerH+70);
-
-      context.fillStyle='#000';
-      context.font='900 64px system-ui';
-      context.fillText(S.time,32,bannerH+240);
-
-      const footerY=ch-80;
-      context.textAlign='left';
-      context.font='600 36px system-ui';
-      context.fillText('Capacity: '+S.cap,32,footerY);
-
-      context.textAlign='center';
-      context.fillText('Available to: '+S.aud,cw/2,footerY);
-
-      context.textAlign='right';
-      context.fillText(S.date,cw-32,footerY);
-    }
-
+    // initial paint
     draw();
   </script>
 </body>
