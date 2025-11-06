@@ -17,12 +17,11 @@
   button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
   .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
   .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
+  .bolds label { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
+  .bolds input[type="checkbox"]{ width:20px; height:20px; }
   canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; touch-action:none; cursor:grab; }
-  .hint{ font-size:12px; opacity:.8; margin-top:8px }
   #fullscreen-overlay { display:none; position:fixed; inset:0; background:#000; z-index:9999; align-items:center; justify-content:center; }
   #fullscreen-overlay canvas { width:90vw; height:auto; border:0; background:#fff; }
-  .sizes label { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .sizes input[type="number"]{ width:110px; }
 </style>
 </head>
 <body>
@@ -33,104 +32,50 @@
 
     <div class="card">
       <div class="row">
-        <div>
-          <label for="room">Room title</label>
-          <input id="room" type="text" placeholder="R105 Projekti S" />
-        </div>
-        <div>
-          <label for="subroom">Sub room</label>
-          <input id="subroom" type="text" placeholder="R103" />
-        </div>
+        <div><label for="room">Room title</label><input id="room" type="text" placeholder="R105 Projekti S" /></div>
+        <div><label for="subroom">Sub room</label><input id="subroom" type="text" placeholder="R103" /></div>
       </div>
 
       <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="status">Status</label>
-          <select id="status"><option>BUSY</option><option>AVAILABLE</option></select>
-        </div>
-        <div>
-          <label for="time">Time range</label>
-          <input id="time" type="text" placeholder="15:00 - 18:00" />
-        </div>
+        <div><label for="status">Status</label><select id="status"><option>BUSY</option><option>AVAILABLE</option></select></div>
+        <div><label for="time">Time range</label><input id="time" type="text" placeholder="15:00 - 18:00" /></div>
       </div>
 
       <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="note">Center note</label>
-          <input id="note" type="text" placeholder="Your paragraph text" />
-        </div>
-        <div>
-          <label for="date">Date</label>
-          <input id="date" type="text" placeholder="dd/mm/yyyy" />
-        </div>
+        <div><label for="note">Center note</label><input id="note" type="text" placeholder="Your paragraph text" /></div>
+        <div><label for="date">Date</label><input id="date" type="text" placeholder="dd/mm/yyyy" /></div>
       </div>
 
       <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="cap">Capacity</label>
-          <input id="cap" type="text" placeholder="8 persons" />
-        </div>
-        <div>
-          <label for="aud">Available to</label>
-          <input id="aud" type="text" placeholder="Staff, Student" />
-        </div>
+        <div><label for="cap">Capacity</label><input id="cap" type="text" placeholder="8 persons" /></div>
+        <div><label for="aud">Available to</label><input id="aud" type="text" placeholder="Staff, Student" /></div>
       </div>
 
       <div class="row3" style="margin-top:var(--gap)">
-        <div>
-          <label for="accent">Accent color</label>
-          <input id="accent" type="color" value="#bd4c52" />
-        </div>
-        <div>
-          <label for="statusColorBusy">Busy color</label>
-          <input id="statusColorBusy" type="color" value="#cf676e" />
-        </div>
-        <div>
-          <label for="statusColorAvail">Available color</label>
-          <input id="statusColorAvail" type="color" value="#26a65b" />
-        </div>
+        <div><label for="accent">Accent color</label><input id="accent" type="color" value="#bd4c52" /></div>
+        <div><label for="statusColorBusy">Busy color</label><input id="statusColorBusy" type="color" value="#cf676e" /></div>
+        <div><label for="statusColorAvail">Available color</label><input id="statusColorAvail" type="color" value="#26a65b" /></div>
       </div>
 
-      <!-- New: global font controls -->
-      <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="fontFamily">Font family</label>
-          <select id="fontFamily">
-            <option value="system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif">System UI</option>
-            <option value="Arial, Helvetica, sans-serif">Arial</option>
-            <option value="Verdana, Geneva, sans-serif">Verdana</option>
-            <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
-            <option value="Trebuchet MS, Helvetica, sans-serif">Trebuchet MS</option>
-            <option value="Georgia, serif">Georgia</option>
-            <option value="Times New Roman, Times, serif">Times New Roman</option>
-            <option value="Courier New, Courier, monospace">Courier New</option>
-          </select>
-        </div>
-        <div>
-          <label for="customFont">Custom font name (advanced)</label>
-          <input id="customFont" type="text" placeholder="e.g., Inter, Poppins" />
-        </div>
-      </div>
-
-      <div class="sizes" style="margin-top:var(--gap)">
+      <!-- Bold toggles -->
+      <div class="bolds" style="margin-top:var(--gap)">
         <div class="row3">
-          <label>Room size <input id="size-room" type="number" min="24" max="220" value="120"></label>
-          <label>Sub size <input id="size-sub" type="number" min="20" max="160" value="56"></label>
-          <label>Status size <input id="size-status" type="number" min="40" max="260" value="160"></label>
+          <label>Room bold <input type="checkbox" id="bold-room" checked></label>
+          <label>Sub bold <input type="checkbox" id="bold-sub" checked></label>
+          <label>Status bold <input type="checkbox" id="bold-status" checked></label>
         </div>
         <div class="row3" style="margin-top:var(--gap)">
-          <label>Time size <input id="size-time" type="number" min="20" max="160" value="64"></label>
-          <label>Note size <input id="size-note" type="number" min="16" max="120" value="28"></label>
-          <label>Footer size <input id="size-footer" type="number" min="16" max="80" value="36"></label>
+          <label>Time bold <input type="checkbox" id="bold-time" checked></label>
+          <label>Note bold <input type="checkbox" id="bold-note"></label>
+          <label>Footer bold <input type="checkbox" id="bold-footer"></label>
         </div>
       </div>
 
       <div class="row" style="margin-top:var(--gap)">
         <button id="fullscreen">Full screen</button>
         <button id="download">Download PNG</button>
-        <button id="copy">Copy to clipboard</button>
+        <button id="copy">Copy</button>
       </div>
-      <p class="hint">Drag any text to move it. Use sizes to change font sizes. Pick a font family or type a custom name installed on the device.</p>
     </div>
   </div>
 
@@ -141,139 +86,84 @@
     const c = $('c'), ctx = c.getContext('2d');
     const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
 
-    // Sizes are user-editable
-    const sizes = {
-      room: +$('size-room').value,
-      sub: +$('size-sub').value,
-      status: +$('size-status').value,
-      time: +$('size-time').value,
-      note: +$('size-note').value,
-      footer: +$('size-footer').value,
-    };
-
-    // Global font family (with optional custom)
-    const fontState = {
-      base: $('fontFamily').value,
-      custom: ''
-    };
-    function fontStack() {
-      return fontState.custom.trim() ? fontState.custom.trim() : fontState.base;
-    }
-    const fonts = {
-      room:   w => `${w} ${sizes.room}px ${fontStack()}`,
-      sub:    w => `${w} ${sizes.sub}px ${fontStack()}`,
-      status: w => `${w} ${sizes.status}px ${fontStack()}`,
-      time:   w => `${w} ${sizes.time}px ${fontStack()}`,
-      note:   w => `${w} ${sizes.note}px ${fontStack()}`,
-      footer: w => `${w} ${sizes.footer}px ${fontStack()}`,
-    };
-
-    const state = {
+    // Text, color, and bold state
+    const S = {
       accent: $('accent').value,
       busy: $('statusColorBusy').value,
       avail: $('statusColorAvail').value,
       text: {
-        room: $('room').value || 'R105 Projekti S',
-        sub: $('subroom').value || 'R103',
-        status: ($('status').value || 'BUSY').toUpperCase(),
-        time: $('time').value || '15:00 - 18:00',
-        note: $('note').value || 'Your paragraph text',
-        date: $('date').value || 'dd/mm/yyyy',
-        cap:  $('cap').value  || '8 persons',
-        aud:  $('aud').value  || 'Staff, Student',
+        room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00',
+        note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student'
       },
-      pos: {
-        room: {x: 32,  y: 24},
-        sub:  {x: 32,  y: 200 - 72},
-        note: {x: 800, y: 210, align:'center'},
-        status: {x: 32, y: 270},
-        time:   {x: 32, y: 440},
-        cap:    {x: 32, y: 820},
-        aud:    {x: 800, y: 820, align:'center'},
-        date:   {x: 1568, y: 820, align:'right'},
-      }
+      bold: {
+        room:true, sub:true, status:true, time:true, note:false, footer:false
+      },
+      pos:{
+        room:{x:32,y:24}, sub:{x:32,y:128}, note:{x:800,y:210,align:'center'},
+        status:{x:32,y:270}, time:{x:32,y:440}, cap:{x:32,y:820},
+        aud:{x:800,y:820,align:'center'}, date:{x:1568,y:820,align:'right'}
+      },
+      size:{room:120,sub:56,status:160,time:64,note:28,footer:36},
+      font:'system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif'
     };
 
-    function itemList(){
-      const colorForStatus = state.text.status === 'AVAILABLE' ? state.avail : state.busy;
-      return [
-        {key:'room',   text:state.text.room,   font:fonts.room('900'),   color:'#000', align:'left',   x:state.pos.room.x,   y:state.pos.room.y},
-        {key:'sub',    text:state.text.sub,    font:fonts.sub('800'),    color:'#000', align:'left',   x:state.pos.sub.x,    y:state.pos.sub.y},
-        {key:'note',   text:state.text.note,   font:fonts.note('600'),   color:'#000', align:state.pos.note.align||'center', x:state.pos.note.x, y:state.pos.note.y},
-        {key:'status', text:state.text.status, font:fonts.status('900'), color:colorForStatus, align:'left', x:state.pos.status.x, y:state.pos.status.y},
-        {key:'time',   text:state.text.time,   font:fonts.time('900'),   color:'#000', align:'left',   x:state.pos.time.x,   y:state.pos.time.y},
-        {key:'cap',    text:'Capacity: ' + state.text.cap, font:fonts.footer('600'), color:'#000', align:'left', x:state.pos.cap.x, y:state.pos.cap.y},
-        {key:'aud',    text:'Available to: ' + state.text.aud, font:fonts.footer('600'), color:'#000', align:state.pos.aud.align||'center', x:state.pos.aud.x, y:state.pos.aud.y},
-        {key:'date',   text:state.text.date,   font:fonts.footer('600'), color:'#000', align:state.pos.date.align||'right', x:state.pos.date.x, y:state.pos.date.y},
-      ];
-    }
+    function font(weight, size){ return `${weight} ${size}px ${S.font}`; }
 
     function draw(context=ctx){
-      const w=1600, h=900;
-      context.clearRect(0,0,w,h);
-      context.fillStyle = '#fff';
-      context.fillRect(0,0,w,h);
-      context.fillStyle = state.accent;
-      context.fillRect(0,0,w,200);
+      const w=1600,h=900; context.clearRect(0,0,w,h);
+      context.fillStyle='#fff'; context.fillRect(0,0,w,h);
+      context.fillStyle=S.accent; context.fillRect(0,0,w,200);
+      const colorForStatus = S.text.status==='AVAILABLE'?S.avail:S.busy;
 
-      for(const it of itemList()){
-        context.textBaseline = 'top';
-        context.textAlign = it.align;
-        context.fillStyle = it.color;
-        context.font = it.font;
-        context.fillText(it.text, it.x, it.y);
+      const items=[
+        {k:'room',t:S.text.room,c:'#000',a:'left'},
+        {k:'sub',t:S.text.sub,c:'#000',a:'left'},
+        {k:'note',t:S.text.note,c:'#000',a:S.pos.note.align},
+        {k:'status',t:S.text.status,c:colorForStatus,a:'left'},
+        {k:'time',t:S.text.time,c:'#000',a:'left'},
+        {k:'cap',t:'Capacity: '+S.text.cap,c:'#000',a:'left'},
+        {k:'aud',t:'Available to: '+S.text.aud,c:'#000',a:S.pos.aud.align},
+        {k:'date',t:S.text.date,c:'#000',a:S.pos.date.align}
+      ];
+
+      for(const it of items){
+        const pos=S.pos[it.k]; const size=S.size[it.k]||S.size.footer;
+        const boldFlag = it.k==='cap'||it.k==='aud'||it.k==='date' ? S.bold.footer : S.bold[it.k];
+        const weight = boldFlag ? '900' : '400';
+        context.textAlign=it.a; context.textBaseline='top'; context.fillStyle=it.c;
+        context.font=font(weight,size);
+        context.fillText(it.t,pos.x,pos.y);
       }
     }
 
-    // Drag to move
-    const boxOf = (ctx, it) => { ctx.font = it.font; const m = ctx.measureText(it.text); const size = parseInt(it.font.split(' ')[1],10)||24; const h = size*1.2; let x=it.x; if(it.align==='center') x-=m.width/2; if(it.align==='right') x-=m.width; return {x, y:it.y, w:m.width, h}; };
-    const pt = e => { const r=c.getBoundingClientRect(); return { x:(e.clientX-r.left)*c.width/r.width, y:(e.clientY-r.top)*c.height/r.height }; };
-    let dragging=null, dOff={dx:0,dy:0};
-    const pick = (x,y)=>{ const items=itemList().slice().reverse(); for(const it of items){const b=boxOf(ctx,it); if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h) return it.key;} return null; };
+    // Drag move
+    const pt=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};};
+    const measure=(it)=>{ctx.font=font('700',S.size[it.k]);const m=ctx.measureText(it.t);const h=S.size[it.k]*1.2;let x=S.pos[it.k].x;if(it.a==='center')x-=m.width/2;if(it.a==='right')x-=m.width;return{x,y:S.pos[it.k].y,w:m.width,h};};
+    const pick=(x,y)=>{const arr=['date','aud','cap','time','status','note','sub','room'];for(const k of arr){const t={k,t:S.text[k]||'',a:(S.pos[k].align||'left')};const b=measure(t);if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return k;}return null;};
+    let drag=null,off={dx:0,dy:0};
+    c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);const p=pt(e);const k=pick(p.x,p.y);if(!k)return;drag=k;const b=measure({k,t:S.text[k],a:S.pos[k].align||'left'});off.dx=p.x-b.x;off.dy=p.y-b.y;c.style.cursor='grabbing';});
+    c.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);const b=measure({k:drag,t:S.text[drag],a:S.pos[drag].align||'left'});let nx=p.x-off.dx,ny=p.y-off.dy;if(S.pos[drag].align==='center')nx+=b.w/2;if(S.pos[drag].align==='right')nx+=b.w;S.pos[drag].x=nx;S.pos[drag].y=ny;draw();});
+    c.addEventListener('pointerup',()=>{drag=null;c.style.cursor='grab';});
 
-    c.addEventListener('pointerdown', e=>{
-      c.setPointerCapture(e.pointerId);
-      const p=pt(e); const key=pick(p.x,p.y); if(!key) return;
-      dragging=key; const it=itemList().find(i=>i.key===key); const b=boxOf(ctx,it);
-      dOff.dx=p.x-b.x; dOff.dy=p.y-b.y; c.style.cursor='grabbing';
+    // Inputs
+    ['room','subroom','time','note','date','cap','aud'].forEach(id=>{
+      $(id).addEventListener('input',()=>{const key=id.replace('room','room').replace('subroom','sub');S.text[key]=$(id).value;draw();});
     });
-    c.addEventListener('pointermove', e=>{
-      if(!dragging) return;
-      const p=pt(e); const it=itemList().find(i=>i.key===dragging); const b=boxOf(ctx,it);
-      let nx=p.x-dOff.dx, ny=p.y-dOff.dy;
-      if(it.align==='center') nx+=b.w/2; if(it.align==='right') nx+=b.w;
-      state.pos[dragging].x=nx; state.pos[dragging].y=ny; draw();
+    $('status').addEventListener('change',()=>{S.text.status=$('status').value.toUpperCase();draw();});
+    $('accent').addEventListener('input',()=>{S.accent=$('accent').value;draw();});
+    $('statusColorBusy').addEventListener('input',()=>{S.busy=$('statusColorBusy').value;draw();});
+    $('statusColorAvail').addEventListener('input',()=>{S.avail=$('statusColorAvail').value;draw();});
+
+    // Bold toggles
+    ['room','sub','status','time','note','footer'].forEach(k=>{
+      $('bold-'+k).addEventListener('change',()=>{S.bold[k]=$('bold-'+k).checked;draw();});
     });
-    c.addEventListener('pointerup', ()=>{ dragging=null; c.style.cursor='grab'; });
 
-    // Bind text
-    const bindText = (id, key) => $(id).addEventListener('input', ()=>{ state.text[key] = $(id).value; draw(); });
-    bindText('room','room'); bindText('subroom','sub'); bindText('time','time'); bindText('note','note'); bindText('date','date'); bindText('cap','cap'); bindText('aud','aud');
-    $('status').addEventListener('change', ()=>{ state.text.status = $('status').value.toUpperCase(); draw(); });
-
-    // Colors
-    $('accent').addEventListener('input', ()=>{ state.accent=$('accent').value; draw(); });
-    $('statusColorBusy').addEventListener('input', ()=>{ state.busy=$('statusColorBusy').value; draw(); });
-    $('statusColorAvail').addEventListener('input', ()=>{ state.avail=$('statusColorAvail').value; draw(); });
-
-    // Sizes
-    const sizeBind = (id, key) => $(id).addEventListener('input', ()=>{ sizes[key] = +$(id).value; draw(); });
-    sizeBind('size-room','room'); sizeBind('size-sub','sub'); sizeBind('size-status','status'); sizeBind('size-time','time'); sizeBind('size-note','note'); sizeBind('size-footer','footer');
-
-    // Font family controls
-    $('fontFamily').addEventListener('change', ()=>{ fontState.base = $('fontFamily').value; draw(); });
-    $('customFont').addEventListener('input', ()=>{ fontState.custom = $('customFont').value; draw(); });
-
-    // Download, copy, fullscreen
-    $('download').addEventListener('click', ()=>{ const a=document.createElement('a'); a.download='room-sign.png'; a.href=c.toDataURL('image/png'); a.click(); });
-    $('copy').addEventListener('click', async ()=>{ const blob=await new Promise(r=>c.toBlob(r,'image/png')); try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); alert('Copied to clipboard'); } catch{ alert('Copy failed. Use Download instead.'); } });
-    $('fullscreen').addEventListener('click', ()=>{ draw(fctx); fullOverlay.style.display='flex'; fullOverlay.requestFullscreen?.(); });
-    fullOverlay.addEventListener('click', ()=>{ document.exitFullscreen?.(); fullOverlay.style.display='none'; });
-
-    // Defaults into inputs
-    $('room').value = state.text.room; $('subroom').value = state.text.sub; $('status').value = state.text.status;
-    $('time').value = state.text.time; $('note').value = state.text.note; $('date').value = state.text.date;
-    $('cap').value = state.text.cap; $('aud').value = state.text.aud;
+    // Download/Copy/Fullscreen
+    $('download').addEventListener('click',()=>{const a=document.createElement('a');a.download='room-sign.png';a.href=c.toDataURL('image/png');a.click();});
+    $('copy').addEventListener('click',async()=>{const b=await new Promise(r=>c.toBlob(r,'image/png'));try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);alert('Copied');}catch{alert('Copy failed');}});
+    $('fullscreen').addEventListener('click',()=>{draw(fctx);fullOverlay.style.display='flex';fullOverlay.requestFullscreen?.();});
+    fullOverlay.addEventListener('click',()=>{document.exitFullscreen?.();fullOverlay.style.display='none';});
 
     draw();
   </script>
