@@ -20,11 +20,11 @@
   canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; touch-action:none; cursor:grab; }
   table { width:100%; border-collapse:separate; border-spacing:0 8px; }
   th, td { font-size:13px; text-align:left; }
-  th { opacity:.8; }
+  th { opacity:.85; }
   td > input[type="number"]{ width:90px; }
   td > input[type="checkbox"]{ width:18px; height:18px; }
   td > select.font { min-width:160px; }
-  .controls h3 { margin: 8px 0; font-size:14px; opacity:.9; }
+  .controls h3 { margin: 10px 0; font-size:14px; opacity:.9; }
   #fullscreen-overlay { display:none; position:fixed; inset:0; background:#000; z-index:9999; align-items:center; justify-content:center; }
   #fullscreen-overlay canvas { width:92vw; height:auto; background:#fff; border:0; }
 </style>
@@ -44,69 +44,11 @@
     </div>
 
     <div class="card controls">
+      <!-- Fonts first so you can see them immediately -->
+      <h3>Fonts</h3>
       <div class="row">
         <div>
-          <label for="room">Room title</label>
-          <input id="room" type="text" placeholder="R105 Projekti S" />
-        </div>
-        <div>
-          <label for="subroom">Sub room</label>
-          <input id="subroom" type="text" placeholder="R103" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="status">Status</label>
-          <select id="status"><option>BUSY</option><option>AVAILABLE</option></select>
-        </div>
-        <div>
-          <label for="time">Time range</label>
-          <input id="time" type="text" placeholder="15:00 - 18:00" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="note">Center note</label>
-          <input id="note" type="text" placeholder="Your paragraph text" />
-        </div>
-        <div>
-          <label for="date">Date</label>
-          <input id="date" type="text" placeholder="dd/mm/yyyy" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <div>
-          <label for="cap">Capacity</label>
-          <input id="cap" type="text" placeholder="8 persons" />
-        </div>
-        <div>
-          <label for="aud">Available to</label>
-          <input id="aud" type="text" placeholder="Staff, Student" />
-        </div>
-      </div>
-
-      <div class="row3" style="margin-top:var(--gap)">
-        <div>
-          <label for="accent">Accent color</label>
-          <input id="accent" type="color" value="#bd4c52" />
-        </div>
-        <div>
-          <label for="statusColorBusy">Busy color</label>
-          <input id="statusColorBusy" type="color" value="#cf676e" />
-        </div>
-        <div>
-          <label for="statusColorAvail">Available color</label>
-          <input id="statusColorAvail" type="color" value="#26a65b" />
-        </div>
-      </div>
-
-      <h3 style="margin-top:16px">Global font</h3>
-      <div class="row">
-        <div>
-          <label for="fontGlobal">Font family</label>
+          <label for="fontGlobal">Global font family</label>
           <select id="fontGlobal" class="font">
             <option value="system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif">System UI</option>
             <option value="Arial, Helvetica, sans-serif">Arial</option>
@@ -124,6 +66,31 @@
         </div>
       </div>
 
+      <h3 style="margin-top:16px">Text content</h3>
+      <div class="row">
+        <div><label for="room">Room title</label><input id="room" type="text" placeholder="R105 Projekti S" /></div>
+        <div><label for="subroom">Sub room</label><input id="subroom" type="text" placeholder="R103" /></div>
+      </div>
+      <div class="row" style="margin-top:var(--gap)">
+        <div><label for="status">Status</label><select id="status"><option>BUSY</option><option>AVAILABLE</option></select></div>
+        <div><label for="time">Time range</label><input id="time" type="text" placeholder="15:00 - 18:00" /></div>
+      </div>
+      <div class="row" style="margin-top:var(--gap)">
+        <div><label for="note">Center note</label><input id="note" type="text" placeholder="Your paragraph text" /></div>
+        <div><label for="date">Date</label><input id="date" type="text" placeholder="dd/mm/yyyy" /></div>
+      </div>
+      <div class="row" style="margin-top:var(--gap)">
+        <div><label for="cap">Capacity</label><input id="cap" type="text" placeholder="8 persons" /></div>
+        <div><label for="aud">Available to</label><input id="aud" type="text" placeholder="Staff, Student" /></div>
+      </div>
+
+      <h3 style="margin-top:16px">Colors</h3>
+      <div class="row3">
+        <div><label for="accent">Accent color</label><input id="accent" type="color" value="#bd4c52" /></div>
+        <div><label for="statusColorBusy">Busy color</label><input id="statusColorBusy" type="color" value="#cf676e" /></div>
+        <div><label for="statusColorAvail">Available color</label><input id="statusColorAvail" type="color" value="#26a65b" /></div>
+      </div>
+
       <h3 style="margin-top:16px">Per item styling</h3>
       <table>
         <thead>
@@ -135,7 +102,6 @@
           </tr>
         </thead>
         <tbody>
-          <!-- one row per key -->
           <tr data-k="room">
             <td>Room</td>
             <td><input type="number" id="size-room" min="24" max="300" value="120"></td>
@@ -195,31 +161,19 @@
     const c = $('c'), ctx = c.getContext('2d');
     const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
 
-    // Base state
     const S = {
       accent: $('accent').value,
       busy: $('statusColorBusy').value,
       avail: $('statusColorAvail').value,
-      text: {
-        room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00',
-        note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student'
-      },
-      // positions (draggable)
-      pos:{
-        room:{x:32,y:24}, sub:{x:32,y:128}, note:{x:800,y:210,align:'center'},
-        status:{x:32,y:270}, time:{x:32,y:440},
-        cap:{x:32,y:820}, aud:{x:800,y:820,align:'center'}, date:{x:1568,y:820,align:'right'}
-      },
-      // sizes and bolds
-      size:{room:120, sub:56, status:160, time:64, note:28, footer:36},
-      bold:{room:true, sub:true, status:true, time:true, note:false, footer:false},
-      // fonts
+      text: { room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00', note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student' },
+      pos:{ room:{x:32,y:24}, sub:{x:32,y:128}, note:{x:800,y:210,align:'center'}, status:{x:32,y:270}, time:{x:32,y:440}, cap:{x:32,y:820}, aud:{x:800,y:820,align:'center'}, date:{x:1568,y:820,align:'right'} },
+      size:{ room:120, sub:56, status:160, time:64, note:28, footer:36 },
+      bold:{ room:true, sub:true, status:true, time:true, note:false, footer:false },
       fontGlobal:"system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif",
       fontCustom:"",
-      fontOverride:{room:"", sub:"", status:"", time:"", note:"", footer:""}
+      fontOverride:{ room:"", sub:"", status:"", time:"", note:"", footer:"" }
     };
 
-    // Helpers
     function fontFamilyFor(key){
       const over = S.fontOverride[key] || "";
       const base = S.fontCustom.trim() ? S.fontCustom.trim() : S.fontGlobal;
@@ -253,7 +207,6 @@
       context.clearRect(0,0,w,h);
       context.fillStyle='#fff'; context.fillRect(0,0,w,h);
       context.fillStyle=S.accent; context.fillRect(0,0,w,200);
-
       for(const it of items()){
         context.textBaseline='top';
         context.textAlign=it.a;
@@ -320,11 +273,9 @@
     $('statusColorBusy').addEventListener('input', ()=>{ S.busy=$('statusColorBusy').value; draw(); });
     $('statusColorAvail').addEventListener('input', ()=>{ S.avail=$('statusColorAvail').value; draw(); });
 
-    // Global font
+    // Fonts
     $('fontGlobal').addEventListener('change', ()=>{ S.fontGlobal = $('fontGlobal').value; draw(); });
     $('fontCustom').addEventListener('input', ()=>{ S.fontCustom = $('fontCustom').value; draw(); });
-
-    // Per item font override
     const fontKeys = ['room','sub','status','time','note','footer'];
     fontKeys.forEach(k=>{
       const sel = $('font-'+k);
@@ -357,11 +308,11 @@
     c.addEventListener('click', openFs);
     fullOverlay.addEventListener('click', ()=>{ document.exitFullscreen?.(); fullOverlay.style.display='none'; });
 
-    // Initialize form with defaults
+    // Initialize defaults
+    $('fontGlobal').value = S.fontGlobal;
     $('room').value=S.text.room; $('subroom').value=S.text.sub; $('status').value=S.text.status;
     $('time').value=S.text.time; $('note').value=S.text.note; $('date').value=S.text.date;
     $('cap').value=S.text.cap; $('aud').value=S.text.aud;
-    $('fontGlobal').value=S.fontGlobal;
 
     draw();
   </script>
