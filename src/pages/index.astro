@@ -3,28 +3,27 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Room Sign Editor</title>
-  <style>
-    :root { --gap: 12px; }
-    html, body { margin:0; height:100%; background:#0b0f19; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif; }
-    .wrap { max-width:1200px; margin:24px auto; padding:0 16px; display:grid; gap:16px; grid-template-columns: 1.2fr .8fr; }
-    @media (max-width: 980px){ .wrap{ grid-template-columns: 1fr; } }
-    .card { background:#141a2a; border:1px solid #232a45; border-radius:14px; padding:12px; }
-    label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
-    input, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3355; background:#0b0f19; color:#fff; }
-    button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
-    .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
-    .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
-    canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; cursor:pointer; }
-    .hint{ font-size:12px; opacity:.8; margin-top:8px }
-    #fullscreen-overlay {
-      display:none; position:fixed; inset:0; background:#000; z-index:9999;
-      align-items:center; justify-content:center;
-    }
-    #fullscreen-overlay canvas { width:90vw; height:auto; border:0; background:#fff; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Room Sign Editor</title>
+<style>
+  :root { --gap: 12px; }
+  html, body { margin:0; height:100%; background:#0b0f19; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif; }
+  .wrap { max-width:1200px; margin:24px auto; padding:0 16px; display:grid; gap:16px; grid-template-columns: 1.2fr .8fr; }
+  @media (max-width: 980px){ .wrap{ grid-template-columns: 1fr; } }
+  .card { background:#141a2a; border:1px solid #232a45; border-radius:14px; padding:12px; }
+  label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
+  input, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3355; background:#0b0f19; color:#fff; }
+  button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
+  canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; touch-action:none; cursor:grab; }
+  .hint{ font-size:12px; opacity:.8; margin-top:8px }
+  #fullscreen-overlay { display:none; position:fixed; inset:0; background:#000; z-index:9999; align-items:center; justify-content:center; }
+  #fullscreen-overlay canvas { width:90vw; height:auto; border:0; background:#fff; }
+  .sizes label { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .sizes input[type="number"]{ width:110px; }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -47,10 +46,7 @@
       <div class="row" style="margin-top:var(--gap)">
         <div>
           <label for="status">Status</label>
-          <select id="status">
-            <option>BUSY</option>
-            <option>AVAILABLE</option>
-          </select>
+          <select id="status"><option>BUSY</option><option>AVAILABLE</option></select>
         </div>
         <div>
           <label for="time">Time range</label>
@@ -95,174 +91,240 @@
         </div>
       </div>
 
+      <div class="sizes" style="margin-top:var(--gap)">
+        <div class="row3">
+          <label>Room size <input id="size-room" type="number" min="24" max="220" value="120"></label>
+          <label>Sub size <input id="size-sub" type="number" min="20" max="160" value="56"></label>
+          <label>Status size <input id="size-status" type="number" min="40" max="260" value="160"></label>
+        </div>
+        <div class="row3" style="margin-top:var(--gap)">
+          <label>Time size <input id="size-time" type="number" min="20" max="160" value="64"></label>
+          <label>Note size <input id="size-note" type="number" min="16" max="120" value="28"></label>
+          <label>Footer size <input id="size-footer" type="number" min="16" max="80" value="36"></label>
+        </div>
+      </div>
+
       <div class="row" style="margin-top:var(--gap)">
         <button id="fullscreen">Full screen</button>
         <button id="download">Download PNG</button>
         <button id="copy">Copy to clipboard</button>
       </div>
-      <p class="hint">Click the preview or the button to enter full screen. Click anywhere to exit.</p>
+      <p class="hint">Drag any text on the image to reposition. Use size inputs to change font sizes.</p>
     </div>
   </div>
 
-  <div id="fullscreen-overlay">
-    <canvas id="fullCanvas" width="1600" height="900"></canvas>
-  </div>
+  <div id="fullscreen-overlay"><canvas id="fullCanvas" width="1600" height="900"></canvas></div>
 
   <script>
-    // helpers
-    const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
+    const c = $('c'), ctx = c.getContext('2d');
+    const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
 
-    const c = $('c');
-    const ctx = c.getContext('2d');
-
-    const fullOverlay = $('fullscreen-overlay');
-    const fullCanvas = $('fullCanvas');
-    const fctx = fullCanvas.getContext('2d');
-
-    const inputs = {
-      room: $('room'),
-      sub: $('subroom'),
-      status: $('status'),
-      time: $('time'),
-      note: $('note'),
-      date: $('date'),
-      cap: $('cap'),
-      aud: $('aud'),
-      accent: $('accent'),
-      busy: $('statusColorBusy'),
-      avail: $('statusColorAvail'),
-      download: $('download'),
-      copy: $('copy'),
-      fullscreen: $('fullscreen')
+    // Base style
+    const fonts = {
+      room:   w => `${w} ${sizes.room}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
+      sub:    w => `${w} ${sizes.sub}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
+      status: w => `${w} ${sizes.status}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
+      time:   w => `${w} ${sizes.time}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
+      note:   w => `${w} ${sizes.note}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
+      footer: w => `${w} ${sizes.footer}px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif`,
     };
 
-    const S = {
-      room: 'R105 Projekti S',
-      sub: 'R103',
-      status: 'BUSY',
-      time: '15:00 - 18:00',
-      note: 'Your paragraph text',
-      date: 'dd/mm/yyyy',
-      cap: '8 persons',
-      aud: 'Staff, Student',
-      accent: '#bd4c52',
-      busy: '#cf676e',
-      avail: '#26a65b'
+    // Sizes are editable via inputs
+    const sizes = {
+      room: +$('size-room').value,
+      sub: +$('size-sub').value,
+      status: +$('size-status').value,
+      time: +$('size-time').value,
+      note: +$('size-note').value,
+      footer: +$('size-footer').value,
     };
 
-    // hydrate defaults into inputs
-    inputs.room.value = S.room;
-    inputs.sub.value = S.sub;
-    inputs.status.value = S.status;
-    inputs.time.value = S.time;
-    inputs.note.value = S.note;
-    inputs.date.value = S.date;
-    inputs.cap.value = S.cap;
-    inputs.aud.value = S.aud;
-    inputs.accent.value = S.accent;
-    inputs.busy.value = S.busy;
-    inputs.avail.value = S.avail;
+    const state = {
+      accent: $('accent').value,
+      busy: $('statusColorBusy').value,
+      avail: $('statusColorAvail').value,
+      text: {
+        room: $('room').value || 'R105 Projekti S',
+        sub: $('subroom').value || 'R103',
+        status: ($('status').value || 'BUSY').toUpperCase(),
+        time: $('time').value || '15:00 - 18:00',
+        note: $('note').value || 'Your paragraph text',
+        date: $('date').value || 'dd/mm/yyyy',
+        cap:  $('cap').value  || '8 persons',
+        aud:  $('aud').value  || 'Staff, Student',
+      },
+      // Initial positions approximate your mock
+      pos: {
+        room: {x: 32,  y: 24},
+        sub:  {x: 32,  y: 200 - 72},
+        note: {x: 800, y: 210, align:'center'},
+        status: {x: 32, y: 270},
+        time:   {x: 32, y: 440},
+        cap:    {x: 32, y: 820},
+        aud:    {x: 800, y: 820, align:'center'},
+        date:   {x: 1568, y: 820, align:'right'},
+      }
+    };
 
-    function draw(context = ctx) {
-      const cw = 1600, ch = 900;
-      context.clearRect(0, 0, cw, ch);
+    // Define items for drawing and hit testing
+    function itemList(){
+      const colorForStatus = state.text.status === 'AVAILABLE' ? state.avail : state.busy;
+      return [
+        {key:'room',   text:state.text.room,   font:fonts.room('900'),   color:'#000',       align:'left',   x:state.pos.room.x,   y:state.pos.room.y},
+        {key:'sub',    text:state.text.sub,    font:fonts.sub('800'),    color:'#000',       align:'left',   x:state.pos.sub.x,    y:state.pos.sub.y},
+        {key:'note',   text:state.text.note,   font:fonts.note('600'),   color:'#000',       align:state.pos.note.align||'center', x:state.pos.note.x, y:state.pos.note.y},
+        {key:'status', text:state.text.status, font:fonts.status('900'), color:colorForStatus, align:'left',  x:state.pos.status.x, y:state.pos.status.y},
+        {key:'time',   text:state.text.time,   font:fonts.time('900'),   color:'#000',       align:'left',   x:state.pos.time.x,   y:state.pos.time.y},
+        {key:'cap',    text:'Capacity: ' + state.text.cap, font:fonts.footer('600'), color:'#000', align:'left', x:state.pos.cap.x, y:state.pos.cap.y},
+        {key:'aud',    text:'Available to: ' + state.text.aud, font:fonts.footer('600'), color:'#000', align:state.pos.aud.align||'center', x:state.pos.aud.x, y:state.pos.aud.y},
+        {key:'date',   text:state.text.date,   font:fonts.footer('600'), color:'#000', align:state.pos.date.align||'right', x:state.pos.date.x, y:state.pos.date.y},
+      ];
+    }
 
+    function draw(context=ctx){
+      const w=1600, h=900;
       // background
-      context.fillStyle = '#ffffff';
-      context.fillRect(0, 0, cw, ch);
+      context.clearRect(0,0,w,h);
+      context.fillStyle = '#fff';
+      context.fillRect(0,0,w,h);
+      // banner
+      context.fillStyle = state.accent;
+      context.fillRect(0,0,w,200);
 
-      // top banner
-      const bannerH = 200;
-      context.fillStyle = S.accent;
-      context.fillRect(0, 0, cw, bannerH);
-
-      // title
-      context.fillStyle = '#000';
-      context.textBaseline = 'top';
-      context.textAlign = 'left';
-      context.font = '900 120px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText(S.room, 32, 24);
-
-      // sub room
-      context.font = '800 56px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText(S.sub, 32, bannerH - 72);
-
-      // center note
-      context.textAlign = 'center';
-      context.font = '600 28px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText(S.note, cw / 2, bannerH + 10);
-
-      // status
-      context.textAlign = 'left';
-      context.fillStyle = S.status === 'AVAILABLE' ? S.avail : S.busy;
-      context.font = '900 160px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText(S.status, 32, bannerH + 70);
-
-      // time
-      context.fillStyle = '#000';
-      context.font = '900 64px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText(S.time, 32, bannerH + 240);
-
-      // footer
-      const footerY = ch - 80;
-      context.textAlign = 'left';
-      context.font = '600 36px system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif';
-      context.fillText('Capacity: ' + S.cap, 32, footerY);
-
-      context.textAlign = 'center';
-      context.fillText('Available to: ' + S.aud, cw / 2, footerY);
-
-      context.textAlign = 'right';
-      context.fillText(S.date, cw - 32, footerY);
+      // draw items
+      for(const it of itemList()){
+        context.textBaseline = 'top';
+        context.textAlign = it.align;
+        context.fillStyle = it.color;
+        context.font = it.font;
+        context.fillText(it.text, it.x, it.y);
+      }
     }
 
-    // wire inputs
-    for (const [key, node] of Object.entries(inputs)) {
-      if (['download','copy','fullscreen'].includes(key)) continue;
-      node.addEventListener('input', () => {
-        const v = node.value;
-        if (key === 'status') S.status = v.toUpperCase();
-        else S[key] = v;
-        draw();
-      });
+    // Hit testing for drag
+    function measureBox(ctx, it){
+      ctx.font = it.font;
+      const metrics = ctx.measureText(it.text);
+      const w = metrics.width;
+      const size = parseInt(it.font.split(' ')[1], 10) || 24;
+      const h = size * 1.2;
+      let x = it.x, y = it.y;
+      if(it.align === 'center') x = x - w/2;
+      if(it.align === 'right')  x = x - w;
+      return {x, y, w, h};
     }
 
-    // download
-    inputs.download.addEventListener('click', () => {
+    let dragging = null;
+    let dragOffset = {dx:0, dy:0};
+
+    function pickItem(px, py){
+      const items = itemList().slice().reverse(); // pick topmost last drawn
+      for(const it of items){
+        const box = measureBox(ctx, it);
+        if(px >= box.x && px <= box.x+box.w && py >= box.y && py <= box.y+box.h){
+          return it.key;
+        }
+      }
+      return null;
+    }
+
+    function canvasPoint(e){
+      const r = c.getBoundingClientRect();
+      const scaleX = c.width / r.width;
+      const scaleY = c.height / r.height;
+      const x = (e.clientX - r.left) * scaleX;
+      const y = (e.clientY - r.top)  * scaleY;
+      return {x, y};
+    }
+
+    c.addEventListener('pointerdown', e=>{
+      c.setPointerCapture(e.pointerId);
+      const p = canvasPoint(e);
+      const key = pickItem(p.x, p.y);
+      if(!key) return;
+      dragging = key;
+      const it = itemList().find(x=>x.key===key);
+      const box = measureBox(ctx, it);
+      dragOffset.dx = p.x - box.x;
+      dragOffset.dy = p.y - box.y;
+      c.style.cursor = 'grabbing';
+    });
+
+    c.addEventListener('pointermove', e=>{
+      if(!dragging) return;
+      const p = canvasPoint(e);
+      const it = itemList().find(x=>x.key===dragging);
+      const box = measureBox(ctx, it);
+      let newX = p.x - dragOffset.dx;
+      let newY = p.y - dragOffset.dy;
+      // convert box top-left back to anchor based on align
+      if(it.align === 'center') newX = newX + box.w/2;
+      if(it.align === 'right')  newX = newX + box.w;
+      state.pos[dragging].x = newX;
+      state.pos[dragging].y = newY;
+      draw();
+    });
+
+    c.addEventListener('pointerup', e=>{
+      dragging = null;
+      c.style.cursor = 'grab';
+    });
+
+    // Bind text inputs
+    const bindText = (id, key) => {
+      const el = $(id);
+      el.addEventListener('input', ()=>{ state.text[key] = el.value; draw(); });
+    };
+    bindText('room','room'); bindText('subroom','sub'); bindText('time','time');
+    bindText('note','note'); bindText('date','date'); bindText('cap','cap'); bindText('aud','aud');
+    $('status').addEventListener('change', ()=>{ state.text.status = $('status').value.toUpperCase(); draw(); });
+
+    // Bind colors
+    $('accent').addEventListener('input', ()=>{ state.accent = $('accent').value; draw(); });
+    $('statusColorBusy').addEventListener('input', ()=>{ state.busy = $('statusColorBusy').value; draw(); });
+    $('statusColorAvail').addEventListener('input', ()=>{ state.avail = $('statusColorAvail').value; draw(); });
+
+    // Bind size inputs
+    $('size-room').addEventListener('input', ()=>{ sizes.room = +$('size-room').value; draw(); });
+    $('size-sub').addEventListener('input', ()=>{ sizes.sub = +$('size-sub').value; draw(); });
+    $('size-status').addEventListener('input', ()=>{ sizes.status = +$('size-status').value; draw(); });
+    $('size-time').addEventListener('input', ()=>{ sizes.time = +$('size-time').value; draw(); });
+    $('size-note').addEventListener('input', ()=>{ sizes.note = +$('size-note').value; draw(); });
+    $('size-footer').addEventListener('input', ()=>{ sizes.footer = +$('size-footer').value; draw(); });
+
+    // Download, copy, fullscreen
+    $('download').addEventListener('click', ()=>{
       const a = document.createElement('a');
       a.download = 'room-sign.png';
       a.href = c.toDataURL('image/png');
       a.click();
     });
-
-    // copy
-    inputs.copy.addEventListener('click', async () => {
+    $('copy').addEventListener('click', async ()=>{
       const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-      try {
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        alert('Copied to clipboard');
-      } catch {
-        alert('Copy failed. Use Download instead.');
-      }
+      try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('Copied to clipboard'); }
+      catch { alert('Copy failed. Use Download instead.'); }
+    });
+    $('fullscreen').addEventListener('click', ()=>{
+      draw(fctx);
+      fullOverlay.style.display='flex';
+      fullOverlay.requestFullscreen?.();
+    });
+    fullOverlay.addEventListener('click', ()=>{
+      document.exitFullscreen?.();
+      fullOverlay.style.display='none';
     });
 
-    // fullscreen
-    function openFullscreen() {
-      // draw to the fullscreen canvas so it is crisp
-      draw(fctx);
-      fullOverlay.style.display = 'flex';
-      if (fullOverlay.requestFullscreen) fullOverlay.requestFullscreen();
-    }
-    function closeFullscreen() {
-      fullOverlay.style.display = 'none';
-      if (document.fullscreenElement) document.exitFullscreen();
-    }
+    // Initial defaults to match placeholders
+    $('room').value    = state.text.room;
+    $('subroom').value = state.text.sub;
+    $('status').value  = state.text.status;
+    $('time').value    = state.text.time;
+    $('note').value    = state.text.note;
+    $('date').value    = state.text.date;
+    $('cap').value     = state.text.cap;
+    $('aud').value     = state.text.aud;
 
-    inputs.fullscreen.addEventListener('click', openFullscreen);
-    c.addEventListener('click', openFullscreen);
-    fullOverlay.addEventListener('click', closeFullscreen);
-
-    // initial paint
     draw();
   </script>
 </body>
