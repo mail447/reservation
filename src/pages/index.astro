@@ -17,8 +17,10 @@
   button { cursor:pointer; border:1px solid #2a3355; background:#1a2240; color:#fff; padding:10px 12px; border-radius:10px; }
   .row{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
   .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
-  .bolds label { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
-  .bolds input[type="checkbox"]{ width:20px; height:20px; }
+  .grid2-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
+  .grid3-2{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); }
+  .toggles label{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
+  .toggles input[type="checkbox"]{ width:20px; height:20px; }
   canvas{ width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #232a45; touch-action:none; cursor:grab; }
   #fullscreen-overlay { display:none; position:fixed; inset:0; background:#000; z-index:9999; align-items:center; justify-content:center; }
   #fullscreen-overlay canvas { width:90vw; height:auto; border:0; background:#fff; }
@@ -38,134 +40,4 @@
 
       <div class="row" style="margin-top:var(--gap)">
         <div><label for="status">Status</label><select id="status"><option>BUSY</option><option>AVAILABLE</option></select></div>
-        <div><label for="time">Time range</label><input id="time" type="text" placeholder="15:00 - 18:00" /></div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <div><label for="note">Center note</label><input id="note" type="text" placeholder="Your paragraph text" /></div>
-        <div><label for="date">Date</label><input id="date" type="text" placeholder="dd/mm/yyyy" /></div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <div><label for="cap">Capacity</label><input id="cap" type="text" placeholder="8 persons" /></div>
-        <div><label for="aud">Available to</label><input id="aud" type="text" placeholder="Staff, Student" /></div>
-      </div>
-
-      <div class="row3" style="margin-top:var(--gap)">
-        <div><label for="accent">Accent color</label><input id="accent" type="color" value="#bd4c52" /></div>
-        <div><label for="statusColorBusy">Busy color</label><input id="statusColorBusy" type="color" value="#cf676e" /></div>
-        <div><label for="statusColorAvail">Available color</label><input id="statusColorAvail" type="color" value="#26a65b" /></div>
-      </div>
-
-      <!-- Bold toggles -->
-      <div class="bolds" style="margin-top:var(--gap)">
-        <div class="row3">
-          <label>Room bold <input type="checkbox" id="bold-room" checked></label>
-          <label>Sub bold <input type="checkbox" id="bold-sub" checked></label>
-          <label>Status bold <input type="checkbox" id="bold-status" checked></label>
-        </div>
-        <div class="row3" style="margin-top:var(--gap)">
-          <label>Time bold <input type="checkbox" id="bold-time" checked></label>
-          <label>Note bold <input type="checkbox" id="bold-note"></label>
-          <label>Footer bold <input type="checkbox" id="bold-footer"></label>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:var(--gap)">
-        <button id="fullscreen">Full screen</button>
-        <button id="download">Download PNG</button>
-        <button id="copy">Copy</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="fullscreen-overlay"><canvas id="fullCanvas" width="1600" height="900"></canvas></div>
-
-  <script>
-    const $ = id => document.getElementById(id);
-    const c = $('c'), ctx = c.getContext('2d');
-    const fullOverlay = $('fullscreen-overlay'), fullCanvas = $('fullCanvas'), fctx = fullCanvas.getContext('2d');
-
-    // Text, color, and bold state
-    const S = {
-      accent: $('accent').value,
-      busy: $('statusColorBusy').value,
-      avail: $('statusColorAvail').value,
-      text: {
-        room:'R105 Projekti S', sub:'R103', status:'BUSY', time:'15:00 - 18:00',
-        note:'Your paragraph text', date:'dd/mm/yyyy', cap:'8 persons', aud:'Staff, Student'
-      },
-      bold: {
-        room:true, sub:true, status:true, time:true, note:false, footer:false
-      },
-      pos:{
-        room:{x:32,y:24}, sub:{x:32,y:128}, note:{x:800,y:210,align:'center'},
-        status:{x:32,y:270}, time:{x:32,y:440}, cap:{x:32,y:820},
-        aud:{x:800,y:820,align:'center'}, date:{x:1568,y:820,align:'right'}
-      },
-      size:{room:120,sub:56,status:160,time:64,note:28,footer:36},
-      font:'system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif'
-    };
-
-    function font(weight, size){ return `${weight} ${size}px ${S.font}`; }
-
-    function draw(context=ctx){
-      const w=1600,h=900; context.clearRect(0,0,w,h);
-      context.fillStyle='#fff'; context.fillRect(0,0,w,h);
-      context.fillStyle=S.accent; context.fillRect(0,0,w,200);
-      const colorForStatus = S.text.status==='AVAILABLE'?S.avail:S.busy;
-
-      const items=[
-        {k:'room',t:S.text.room,c:'#000',a:'left'},
-        {k:'sub',t:S.text.sub,c:'#000',a:'left'},
-        {k:'note',t:S.text.note,c:'#000',a:S.pos.note.align},
-        {k:'status',t:S.text.status,c:colorForStatus,a:'left'},
-        {k:'time',t:S.text.time,c:'#000',a:'left'},
-        {k:'cap',t:'Capacity: '+S.text.cap,c:'#000',a:'left'},
-        {k:'aud',t:'Available to: '+S.text.aud,c:'#000',a:S.pos.aud.align},
-        {k:'date',t:S.text.date,c:'#000',a:S.pos.date.align}
-      ];
-
-      for(const it of items){
-        const pos=S.pos[it.k]; const size=S.size[it.k]||S.size.footer;
-        const boldFlag = it.k==='cap'||it.k==='aud'||it.k==='date' ? S.bold.footer : S.bold[it.k];
-        const weight = boldFlag ? '900' : '400';
-        context.textAlign=it.a; context.textBaseline='top'; context.fillStyle=it.c;
-        context.font=font(weight,size);
-        context.fillText(it.t,pos.x,pos.y);
-      }
-    }
-
-    // Drag move
-    const pt=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};};
-    const measure=(it)=>{ctx.font=font('700',S.size[it.k]);const m=ctx.measureText(it.t);const h=S.size[it.k]*1.2;let x=S.pos[it.k].x;if(it.a==='center')x-=m.width/2;if(it.a==='right')x-=m.width;return{x,y:S.pos[it.k].y,w:m.width,h};};
-    const pick=(x,y)=>{const arr=['date','aud','cap','time','status','note','sub','room'];for(const k of arr){const t={k,t:S.text[k]||'',a:(S.pos[k].align||'left')};const b=measure(t);if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return k;}return null;};
-    let drag=null,off={dx:0,dy:0};
-    c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);const p=pt(e);const k=pick(p.x,p.y);if(!k)return;drag=k;const b=measure({k,t:S.text[k],a:S.pos[k].align||'left'});off.dx=p.x-b.x;off.dy=p.y-b.y;c.style.cursor='grabbing';});
-    c.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);const b=measure({k:drag,t:S.text[drag],a:S.pos[drag].align||'left'});let nx=p.x-off.dx,ny=p.y-off.dy;if(S.pos[drag].align==='center')nx+=b.w/2;if(S.pos[drag].align==='right')nx+=b.w;S.pos[drag].x=nx;S.pos[drag].y=ny;draw();});
-    c.addEventListener('pointerup',()=>{drag=null;c.style.cursor='grab';});
-
-    // Inputs
-    ['room','subroom','time','note','date','cap','aud'].forEach(id=>{
-      $(id).addEventListener('input',()=>{const key=id.replace('room','room').replace('subroom','sub');S.text[key]=$(id).value;draw();});
-    });
-    $('status').addEventListener('change',()=>{S.text.status=$('status').value.toUpperCase();draw();});
-    $('accent').addEventListener('input',()=>{S.accent=$('accent').value;draw();});
-    $('statusColorBusy').addEventListener('input',()=>{S.busy=$('statusColorBusy').value;draw();});
-    $('statusColorAvail').addEventListener('input',()=>{S.avail=$('statusColorAvail').value;draw();});
-
-    // Bold toggles
-    ['room','sub','status','time','note','footer'].forEach(k=>{
-      $('bold-'+k).addEventListener('change',()=>{S.bold[k]=$('bold-'+k).checked;draw();});
-    });
-
-    // Download/Copy/Fullscreen
-    $('download').addEventListener('click',()=>{const a=document.createElement('a');a.download='room-sign.png';a.href=c.toDataURL('image/png');a.click();});
-    $('copy').addEventListener('click',async()=>{const b=await new Promise(r=>c.toBlob(r,'image/png'));try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);alert('Copied');}catch{alert('Copy failed');}});
-    $('fullscreen').addEventListener('click',()=>{draw(fctx);fullOverlay.style.display='flex';fullOverlay.requestFullscreen?.();});
-    fullOverlay.addEventListener('click',()=>{document.exitFullscreen?.();fullOverlay.style.display='none';});
-
-    draw();
-  </script>
-</body>
-</html>
+        <div><label for="time">Time range</label
